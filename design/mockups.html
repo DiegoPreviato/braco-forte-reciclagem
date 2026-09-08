@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Tela de Compra — proposta de ergonomia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;color:#17201a;background:#e4e7e1;-webkit-font-smoothing:antialiased;}
+  .mono{font-family:'IBM Plex Mono','Consolas',monospace;}
+
+  .sheet{max-width:1180px;margin:0 auto;padding:26px 20px 70px;}
+  .sheet>header{margin-bottom:26px;}
+  .sheet>header h1{font-size:22px;margin:0 0 4px;}
+  .sheet>header p{margin:0;color:#5c655d;font-size:15px;max-width:70ch;}
+  .caso{margin-bottom:46px;}
+  .caso h2{font-size:19px;margin:0 0 3px;}
+  .caso .sub{margin:0 0 14px;color:#5c655d;font-size:14px;}
+  .notas{margin-top:14px;}
+  .nota{font-size:14px;color:#3a453c;padding:7px 0;border-top:1px solid #d7dad3;line-height:1.5;}
+  .nota b{color:#17201a;}
+
+  body.solo .sheet>header,body.solo .caso{display:none;}
+  body.solo .caso:target{display:block;}
+
+  /* ---------- a tela ---------- */
+  .tela{width:1024px;background:#f4f6f2;display:flex;flex-direction:column;border:1px solid #cdd1c9;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#17201a;color:#fff;}
+  .hdr .nome{font-size:19px;font-weight:700;}
+  .hdr .meta{font-size:14px;color:#aeb8af;}
+  .hdr .adm{font-size:13px;color:#8f998f;border:1px solid #39443b;border-radius:6px;padding:4px 10px;}
+
+  .sec{padding:14px 20px;}
+  .passo{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .passo .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#17201a;color:#fff;font-size:14px;font-weight:600;flex:0 0 auto;}
+  .passo .n.off{background:#c2c8bf;}
+  .passo .t{font-size:17px;font-weight:600;}
+  .passo .t.off{color:#8a948b;}
+
+  .grid-mat{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+  .mat{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px 13px;min-height:62px;background:#fff;border:1.5px solid #d3d7d0;border-radius:8px;cursor:pointer;text-align:left;font-family:inherit;position:relative;}
+  .mat .mn{font-size:16px;font-weight:600;color:#17201a;}
+  .mat .mp{font-size:13px;color:#5c655d;}
+  .mat.sel{background:#e7f3ea;border:2px solid #1f7a3d;padding:10.5px 12px;}
+  .mat.sel .mn{font-weight:700;color:#12481f;}
+  .mat.sel .mp{color:#1f7a3d;}
+  .mat .chk{position:absolute;top:8px;right:8px;display:flex;}
+
+  .acao{display:flex;align-items:center;gap:16px;background:#fff;border:2px solid #1f7a3d;border-radius:10px;padding:13px 16px;}
+  .acao .malbl{font-size:18px;font-weight:700;color:#12481f;line-height:1.15;}
+  .acao .maprc{font-size:13px;color:#5c655d;}
+  .acao .peso{display:flex;align-items:center;gap:10px;}
+  .acao .peso .lb{font-size:15px;color:#5c655d;}
+  .pesoinp{display:flex;align-items:baseline;border:2px solid #17201a;border-radius:8px;padding:6px 12px;background:#fff;}
+  .pesoinp .v{font-size:26px;font-weight:600;color:#17201a;}
+  .pesoinp .v.ph{color:#aab2a8;}
+  .pesoinp .u{font-size:16px;color:#5c655d;margin-left:6px;}
+  .acao .eq{font-size:22px;font-weight:600;color:#17201a;}
+  .btn-add{background:#1f7a3d;color:#fff;border:none;border-radius:8px;height:54px;padding:0 24px;font-size:17px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:inherit;margin-left:auto;}
+  .acao.off{border:2px dashed #cfd3cc;background:#eef0eb;color:#8a948b;justify-content:center;padding:24px;font-size:16px;}
+  .hint{font-size:14px;color:#5c655d;margin-top:9px;}
+  .hint.ok{color:#166534;background:#e7f3ea;border-radius:7px;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:14px;}
+
+  .secttl{font-size:13px;font-weight:600;color:#5c655d;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+  .lista{display:flex;flex-direction:column;gap:6px;}
+  .rowlist{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #dde1da;border-radius:8px;padding:11px 14px;}
+  .rowlist .rm{font-size:18px;font-weight:600;flex:0 0 188px;}
+  .rowlist .rc{font-size:14px;color:#5c655d;}
+  .rowlist .rs{margin-left:auto;font-size:20px;font-weight:600;}
+  .rowlist.novo{background:#e7f3ea;border:1.5px solid #1f7a3d;}
+  .rowlist .flag{display:flex;flex:0 0 auto;}
+  .btn-rm{background:#fff;color:#b3261e;border:1.5px solid #e6bcb8;border-radius:7px;height:40px;padding:0 13px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;}
+  .vazio{border:1.5px dashed #cdd1c9;border-radius:8px;padding:40px;text-align:center;color:#8a948b;font-size:16px;line-height:1.7;}
+
+  .cli-toggle{background:#eceee9;border:none;border-top:1px solid #dde1da;padding:12px 20px;text-align:left;font-size:15px;color:#3a453c;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;font-family:inherit;}
+  .cli-toggle .op{color:#95a096;}
+  .cli-panel{background:#fff;border-top:1px solid #dde1da;padding:16px 20px;}
+  .cli-panel .cab{display:flex;align-items:center;gap:8px;margin-bottom:13px;font-size:16px;font-weight:600;}
+  .cli-panel .cab .op{color:#95a096;font-weight:400;}
+  .fields{display:flex;gap:14px;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field .fl{font-size:13px;color:#5c655d;}
+  .field .fi{height:46px;border:1.5px solid #c9cdc6;border-radius:8px;padding:0 12px;font-size:16px;display:flex;align-items:center;color:#17201a;background:#fff;}
+  .pays{display:flex;gap:8px;flex-wrap:wrap;}
+  .pay{height:46px;padding:0 18px;border-radius:8px;border:1.5px solid #d3d7d0;background:#fff;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;color:#17201a;display:flex;align-items:center;}
+  .pay.sel{background:#e7f3ea;border:2px solid #1f7a3d;color:#12481f;font-weight:600;}
+
+  .totbar{background:#17201a;color:#fff;padding:14px 20px;display:flex;align-items:center;gap:22px;}
+  .totbar .tl{font-size:12px;color:#8f998f;text-transform:uppercase;letter-spacing:.6px;}
+  .totbar .ts{font-size:14px;color:#aeb8af;}
+  .totbar .tv{font-size:42px;font-weight:700;line-height:1;}
+  .totbar .acts{margin-left:auto;display:flex;gap:10px;}
+  .btn-fin{background:#2fb457;color:#08260f;border:none;border-radius:8px;height:58px;padding:0 26px;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;font-family:inherit;}
+  .btn-fin.off{background:#3c4a3f;color:#7f8a81;cursor:not-allowed;}
+  .btn-sec{background:transparent;color:#cdd4ce;border:1.5px solid #4a544c;border-radius:8px;height:58px;padding:0 18px;font-size:15px;cursor:pointer;font-family:inherit;}
+</style>
+</head>
+<body>
+<div class="sheet">
+<header>
+  <h1>Tela de Compra — proposta de ergonomia</h1>
+  <p>Redesenho focado em quem tem pouca intimidade com computador: materiais viram botões grandes, uma etapa de cada vez, o total sempre à vista e nada de enfeite. Quatro momentos do uso abaixo.</p>
+</header>
+
+<!-- ============ 1 ============ -->
+<div class="caso" id="s1">
+  <h2>1 · Início da compra</h2>
+  <p class="sub">Cliente chegou. Nada pesado ainda.</p>
+  <div class="tela">
+    <div class="hdr">
+      <span class="nome">Braço Forte Reciclagem</span>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span class="meta mono">Compra Nº 07 · 07/09/2026</span>
+        <span class="adm">Administração</span>
+      </div>
+    </div>
+
+    <div class="sec" style="padding-bottom:6px;">
+      <div class="passo"><span class="n">1</span><span class="t">Escolha o material</span></div>
+      <div class="grid-mat">
+        <button class="mat"><span class="mn">Papelão</span><span class="mp mono">R$ 0,55/kg</span></button>
+        <button class="mat"><span class="mn">Papel branco</span><span class="mp mono">R$ 0,70/kg</span></button>
+        <button class="mat"><span class="mn">Jornal / revista</span><span class="mp mono">R$ 0,25/kg</span></button>
+        <button class="mat"><span class="mn">Plástico PET</span><span class="mp mono">R$ 1,20/kg</span></button>
+        <button class="mat"><span class="mn">Plástico duro</span><span class="mp mono">R$ 0,90/kg</span></button>
+        <button class="mat"><span class="mn">Plástico filme</span><span class="mp mono">R$ 0,40/kg</span></button>
+        <button class="mat"><span class="mn">Ferro / sucata</span><span class="mp mono">R$ 0,60/kg</span></button>
+        <button class="mat"><span class="mn">Alumínio latinha</span><span class="mp mono">R$ 5,00/kg</span></button>
+        <button class="mat"><span class="mn">Alumínio perfil</span><span class="mp mono">R$ 4,50/kg</span></button>
+        <button class="mat"><span class="mn">Cobre</span><span class="mp mono">R$ 32,00/kg</span></button>
+        <button class="mat"><span class="mn">Metal / bronze</span><span class="mp mono">R$ 18,00/kg</span></button>
+        <button class="mat"><span class="mn">Vidro</span><span class="mp mono">R$ 0,10/kg</span></button>
+      </div>
+    </div>
+
+    <div class="sec" style="padding-top:8px;padding-bottom:8px;">
+      <div class="passo"><span class="n off">2</span><span class="t off">Peso do material</span></div>
+      <div class="acao off">Escolha um material acima para informar o peso</div>
+    </div>
+
+    <div class="sec" style="padding-top:6px;flex:1 1 auto;">
+      <div class="secttl">Materiais desta compra</div>
+      <div class="vazio">Nenhum material adicionado ainda.<br>Escolha o material e informe o peso para começar.</div>
+    </div>
+
+    <button class="cli-toggle">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      Dados do cliente e forma de pagamento <span class="op">(opcional)</span>
+    </button>
+
+    <div class="totbar">
+      <div style="display:flex;flex-direction:column;">
+        <span class="tl">Total a pagar</span>
+        <span class="ts mono">Adicione ao menos 1 material</span>
+      </div>
+      <span class="tv mono">R$ 0,00</span>
+      <div class="acts">
+        <button class="btn-fin off">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>
+          Imprimir e finalizar
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="notas">
+    <div class="nota">→ A etapa <b>2 fica travada</b> (tracejada, número apagado) até escolher um material. O operador nunca vê um campo que ainda não deve usar.</div>
+    <div class="nota">→ O botão <b>Imprimir e finalizar</b> fica apagado enquanto não houver itens, com o motivo escrito ao lado do total.</div>
+    <div class="nota">→ Todos os 12 materiais aparecem de uma vez, em botões de 1 clique. Sem lista suspensa: dropdown obriga a abrir, ler, rolar e acertar o clique — e some quando erra.</div>
+  </div>
+</div>
+
+<!-- ============ 2 ============ -->
+<div class="caso" id="s2">
+  <h2>2 · Em uso — pesando os materiais</h2>
+  <p class="sub">Operador escolheu <b>Papelão</b>, leu 12,5 kg na balança e digitou. Já tinha adicionado 3 materiais antes.</p>
+  <div class="tela">
+    <div class="hdr">
+      <span class="nome">Braço Forte Reciclagem</span>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span class="meta mono">Compra Nº 07 · 07/09/2026</span>
+        <span class="adm">Administração</span>
+      </div>
+    </div>
+
+    <div class="sec" style="padding-bottom:6px;">
+      <div class="passo"><span class="n">1</span><span class="t">Escolha o material</span></div>
+      <div class="grid-mat">
+        <button class="mat sel"><span class="mn">Papelão</span><span class="mp mono">R$ 0,55/kg</span>
+          <span class="chk"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f7a3d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5-6"/></svg></span>
+        </button>
+        <button class="mat"><span class="mn">Papel branco</span><span class="mp mono">R$ 0,70/kg</span></button>
+        <button class="mat"><span class="mn">Jornal / revista</span><span class="mp mono">R$ 0,25/kg</span></button>
+        <button class="mat"><span class="mn">Plástico PET</span><span class="mp mono">R$ 1,20/kg</span></button>
+        <button class="mat"><span class="mn">Plástico duro</span><span class="mp mono">R$ 0,90/kg</span></button>
+        <button class="mat"><span class="mn">Plástico filme</span><span class="mp mono">R$ 0,40/kg</span></button>
+        <button class="mat"><span class="mn">Ferro / sucata</span><span class="mp mono">R$ 0,60/kg</span></button>
+        <button class="mat"><span class="mn">Alumínio latinha</span><span class="mp mono">R$ 5,00/kg</span></button>
+        <button class="mat"><span class="mn">Alumínio perfil</span><span class="mp mono">R$ 4,50/kg</span></button>
+        <button class="mat"><span class="mn">Cobre</span><span class="mp mono">R$ 32,00/kg</span></button>
+        <button class="mat"><span class="mn">Metal / bronze</span><span class="mp mono">R$ 18,00/kg</span></button>
+        <button class="mat"><span class="mn">Vidro</span><span class="mp mono">R$ 0,10/kg</span></button>
+      </div>
+    </div>
+
+    <div class="sec" style="padding-top:8px;padding-bottom:8px;">
+      <div class="passo"><span class="n">2</span><span class="t">Peso do material</span></div>
+      <div class="acao">
+        <div>
+          <div class="malbl">PAPELÃO</div>
+          <div class="maprc mono">R$ 0,55 / kg</div>
+        </div>
+        <div class="peso">
+          <span class="lb">Peso</span>
+          <span class="pesoinp"><span class="v mono">12,5</span><span class="u">kg</span></span>
+        </div>
+        <div class="eq mono">= R$ 6,88</div>
+        <button class="btn-add">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>
+          Adicionar
+        </button>
+      </div>
+      <div class="hint">Digite o peso lido na balança e tecle <b>Enter</b> — ou clique em <b>Adicionar</b>.</div>
+    </div>
+
+    <div class="sec" style="padding-top:6px;flex:1 1 auto;">
+      <div class="secttl">Materiais desta compra</div>
+      <div class="lista">
+        <div class="rowlist"><span class="rm">Ferro / sucata</span><span class="rc mono">40 kg × R$ 0,60</span><span class="rs mono">R$ 24,00</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+        <div class="rowlist"><span class="rm">Alumínio latinha</span><span class="rc mono">7,3 kg × R$ 5,00</span><span class="rs mono">R$ 36,50</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+        <div class="rowlist"><span class="rm">Papel branco</span><span class="rc mono">9 kg × R$ 0,70</span><span class="rs mono">R$ 6,30</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+      </div>
+    </div>
+
+    <button class="cli-toggle">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      Dados do cliente e forma de pagamento <span class="op">(opcional)</span>
+    </button>
+
+    <div class="totbar">
+      <div style="display:flex;flex-direction:column;">
+        <span class="tl">Total a pagar</span>
+        <span class="ts mono">3 itens · 56,300 kg</span>
+      </div>
+      <span class="tv mono">R$ 66,80</span>
+      <div class="acts">
+        <button class="btn-sec">Finalizar sem imprimir</button>
+        <button class="btn-fin">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>
+          Imprimir e finalizar
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="notas">
+    <div class="nota">→ <b>Uma área de ação só</b>, destacada em verde. Ao tocar no material, o cursor pula sozinho para o campo de peso; não há terceiro lugar para clicar.</div>
+    <div class="nota">→ A conta aparece pronta antes de confirmar: <span class="mono">12,5 kg × R$ 0,55 = R$ 6,88</span>. O operador confere o valor com o cliente olhando a tela.</div>
+    <div class="nota">→ O <b>TOTAL é o maior número da tela</b> e fica fixo na barra escura embaixo, mesmo com a lista crescendo. Remover item é um botão com a palavra “Remover”, não um “x”.</div>
+  </div>
+</div>
+
+<!-- ============ 3 ============ -->
+<div class="caso" id="s3">
+  <h2>3 · Confirmação ao adicionar</h2>
+  <p class="sub">Operador apertou <b>Adicionar</b>. O Papelão entrou na lista.</p>
+  <div class="tela">
+    <div class="hdr">
+      <span class="nome">Braço Forte Reciclagem</span>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span class="meta mono">Compra Nº 07 · 07/09/2026</span>
+        <span class="adm">Administração</span>
+      </div>
+    </div>
+
+    <div class="sec" style="padding-bottom:6px;">
+      <div class="passo"><span class="n">1</span><span class="t">Escolha o material</span></div>
+      <div class="grid-mat">
+        <button class="mat sel"><span class="mn">Papelão</span><span class="mp mono">R$ 0,55/kg</span>
+          <span class="chk"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f7a3d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5-6"/></svg></span>
+        </button>
+        <button class="mat"><span class="mn">Papel branco</span><span class="mp mono">R$ 0,70/kg</span></button>
+        <button class="mat"><span class="mn">Jornal / revista</span><span class="mp mono">R$ 0,25/kg</span></button>
+        <button class="mat"><span class="mn">Plástico PET</span><span class="mp mono">R$ 1,20/kg</span></button>
+        <button class="mat"><span class="mn">Plástico duro</span><span class="mp mono">R$ 0,90/kg</span></button>
+        <button class="mat"><span class="mn">Plástico filme</span><span class="mp mono">R$ 0,40/kg</span></button>
+        <button class="mat"><span class="mn">Ferro / sucata</span><span class="mp mono">R$ 0,60/kg</span></button>
+        <button class="mat"><span class="mn">Alumínio latinha</span><span class="mp mono">R$ 5,00/kg</span></button>
+        <button class="mat"><span class="mn">Alumínio perfil</span><span class="mp mono">R$ 4,50/kg</span></button>
+        <button class="mat"><span class="mn">Cobre</span><span class="mp mono">R$ 32,00/kg</span></button>
+        <button class="mat"><span class="mn">Metal / bronze</span><span class="mp mono">R$ 18,00/kg</span></button>
+        <button class="mat"><span class="mn">Vidro</span><span class="mp mono">R$ 0,10/kg</span></button>
+      </div>
+    </div>
+
+    <div class="sec" style="padding-top:8px;padding-bottom:8px;">
+      <div class="passo"><span class="n">2</span><span class="t">Peso do material</span></div>
+      <div class="acao">
+        <div>
+          <div class="malbl">PAPELÃO</div>
+          <div class="maprc mono">R$ 0,55 / kg</div>
+        </div>
+        <div class="peso">
+          <span class="lb">Peso</span>
+          <span class="pesoinp"><span class="v ph mono">0,00</span><span class="u">kg</span></span>
+        </div>
+        <div class="eq mono" style="color:#8a948b;">= R$ 0,00</div>
+        <button class="btn-add">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>
+          Adicionar
+        </button>
+      </div>
+      <div class="hint ok">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1f7a3d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5-6"/></svg>
+        <span><b>Papelão — 12,5 kg</b> adicionado (R$ 6,88). Pese a próxima carga ou escolha outro material.</span>
+      </div>
+    </div>
+
+    <div class="sec" style="padding-top:6px;flex:1 1 auto;">
+      <div class="secttl">Materiais desta compra</div>
+      <div class="lista">
+        <div class="rowlist novo">
+          <span class="flag"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f7a3d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5-6"/></svg></span>
+          <span class="rm" style="flex-basis:164px;">Papelão</span><span class="rc mono">12,5 kg × R$ 0,55</span><span class="rs mono">R$ 6,88</span>
+          <button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button>
+        </div>
+        <div class="rowlist"><span class="rm">Ferro / sucata</span><span class="rc mono">40 kg × R$ 0,60</span><span class="rs mono">R$ 24,00</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+        <div class="rowlist"><span class="rm">Alumínio latinha</span><span class="rc mono">7,3 kg × R$ 5,00</span><span class="rs mono">R$ 36,50</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+        <div class="rowlist"><span class="rm">Papel branco</span><span class="rc mono">9 kg × R$ 0,70</span><span class="rs mono">R$ 6,30</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+      </div>
+    </div>
+
+    <button class="cli-toggle">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      Dados do cliente e forma de pagamento <span class="op">(opcional)</span>
+    </button>
+
+    <div class="totbar">
+      <div style="display:flex;flex-direction:column;">
+        <span class="tl">Total a pagar</span>
+        <span class="ts mono">4 itens · 68,800 kg</span>
+      </div>
+      <span class="tv mono">R$ 73,68</span>
+      <div class="acts">
+        <button class="btn-sec">Finalizar sem imprimir</button>
+        <button class="btn-fin">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>
+          Imprimir e finalizar
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="notas">
+    <div class="nota">→ Confirmação impossível de não ver: a <b>linha nova acende verde com ✓</b> no topo da lista e o total sobe na hora. Mensagem verde repete o que entrou.</div>
+    <div class="nota">→ O material <b>continua selecionado</b> e o campo de peso volta a ficar vazio — pronto para a próxima carga do mesmo tipo, que é o caso mais comum no pátio.</div>
+    <div class="nota">→ Nada de janela de alerta (“OK”) que trava a tela. O aviso aparece no lugar e some sozinho no próximo item.</div>
+  </div>
+</div>
+
+<!-- ============ 4 ============ -->
+<div class="caso" id="s4">
+  <h2>4 · Revisão e finalização</h2>
+  <p class="sub">Tudo pesado. Operador abriu os dados do cliente e vai imprimir as 2 vias.</p>
+  <div class="tela">
+    <div class="hdr">
+      <span class="nome">Braço Forte Reciclagem</span>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span class="meta mono">Compra Nº 07 · 07/09/2026</span>
+        <span class="adm">Administração</span>
+      </div>
+    </div>
+
+    <div class="sec" style="padding-bottom:6px;">
+      <div class="passo"><span class="n">1</span><span class="t">Escolha o material</span></div>
+      <div class="grid-mat">
+        <button class="mat"><span class="mn">Papelão</span><span class="mp mono">R$ 0,55/kg</span></button>
+        <button class="mat"><span class="mn">Papel branco</span><span class="mp mono">R$ 0,70/kg</span></button>
+        <button class="mat"><span class="mn">Jornal / revista</span><span class="mp mono">R$ 0,25/kg</span></button>
+        <button class="mat"><span class="mn">Plástico PET</span><span class="mp mono">R$ 1,20/kg</span></button>
+        <button class="mat"><span class="mn">Plástico duro</span><span class="mp mono">R$ 0,90/kg</span></button>
+        <button class="mat"><span class="mn">Plástico filme</span><span class="mp mono">R$ 0,40/kg</span></button>
+        <button class="mat"><span class="mn">Ferro / sucata</span><span class="mp mono">R$ 0,60/kg</span></button>
+        <button class="mat"><span class="mn">Alumínio latinha</span><span class="mp mono">R$ 5,00/kg</span></button>
+        <button class="mat"><span class="mn">Alumínio perfil</span><span class="mp mono">R$ 4,50/kg</span></button>
+        <button class="mat"><span class="mn">Cobre</span><span class="mp mono">R$ 32,00/kg</span></button>
+        <button class="mat"><span class="mn">Metal / bronze</span><span class="mp mono">R$ 18,00/kg</span></button>
+        <button class="mat"><span class="mn">Vidro</span><span class="mp mono">R$ 0,10/kg</span></button>
+      </div>
+    </div>
+
+    <div class="sec" style="padding-top:8px;padding-bottom:8px;">
+      <div class="passo"><span class="n off">2</span><span class="t off">Peso do material</span></div>
+      <div class="acao off">Escolha outro material para adicionar — ou finalize a compra abaixo</div>
+    </div>
+
+    <div class="sec" style="padding-top:6px;">
+      <div class="secttl">Materiais desta compra</div>
+      <div class="lista">
+        <div class="rowlist"><span class="rm">Ferro / sucata</span><span class="rc mono">40 kg × R$ 0,60</span><span class="rs mono">R$ 24,00</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+        <div class="rowlist"><span class="rm">Alumínio latinha</span><span class="rc mono">7,3 kg × R$ 5,00</span><span class="rs mono">R$ 36,50</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+        <div class="rowlist"><span class="rm">Papel branco</span><span class="rc mono">9 kg × R$ 0,70</span><span class="rs mono">R$ 6,30</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+        <div class="rowlist"><span class="rm">Papelão</span><span class="rc mono">12,5 kg × R$ 0,55</span><span class="rs mono">R$ 6,88</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+        <div class="rowlist"><span class="rm">Cobre</span><span class="rc mono">2,1 kg × R$ 32,00</span><span class="rs mono">R$ 67,20</span><button class="btn-rm"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>Remover</button></div>
+      </div>
+    </div>
+
+    <div class="cli-panel">
+      <div class="cab">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        Dados do cliente e forma de pagamento <span class="op">(opcional)</span>
+      </div>
+      <div class="fields">
+        <div class="field" style="flex:1 1 auto;"><span class="fl">Nome do cliente</span><span class="fi">José Aparecido da Silva</span></div>
+        <div class="field" style="flex:0 0 190px;"><span class="fl">CPF / CNPJ</span><span class="fi">123.456.789-00</span></div>
+        <div class="field" style="flex:0 0 150px;"><span class="fl">Placa</span><span class="fi">FIC-1A23</span></div>
+      </div>
+      <div style="margin-top:14px;">
+        <div class="fl" style="font-size:13px;color:#5c655d;margin-bottom:6px;">Forma de pagamento</div>
+        <div class="pays">
+          <span class="pay">Dinheiro</span>
+          <span class="pay sel">PIX</span>
+          <span class="pay">Transferência</span>
+          <span class="pay">Cheque</span>
+          <span class="pay">A pagar</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="totbar">
+      <div style="display:flex;flex-direction:column;">
+        <span class="tl">Total a pagar</span>
+        <span class="ts mono">5 itens · 70,900 kg</span>
+      </div>
+      <span class="tv mono">R$ 140,88</span>
+      <div class="acts">
+        <button class="btn-sec">Finalizar sem imprimir</button>
+        <button class="btn-fin">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>
+          Imprimir e finalizar
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="notas">
+    <div class="nota">→ Os dados do cliente <b>ficam escondidos até precisar</b> (a maior parte das compras não usa). Um toque no cabeçalho abre e fecha.</div>
+    <div class="nota">→ Forma de pagamento vira <b>botões grandes</b>, não lista suspensa — some um passo e o operador vê todas as opções ao mesmo tempo.</div>
+    <div class="nota">→ Uma única ação principal: <b>Imprimir e finalizar</b> (grande, verde). “Finalizar sem imprimir” fica ali, discreto, para quem não vai dar recibo.</div>
+  </div>
+</div>
+
+</div>
+<script>if(location.hash){document.body.className='solo';}</script>
+</body>
+</html>

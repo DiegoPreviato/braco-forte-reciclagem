@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Braço Forte Reciclagem — Compras</title>
+<style>
+  /* ====== base: leve, alto contraste, alvos grandes ====== */
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, Arial, sans-serif;
+    font-size: 16px; color: #17201a; background: #e4e7e1; line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 { margin: 0 0 10px; }
+  .mono { font-family: 'IBM Plex Mono', 'Consolas', monospace; }
+
+  button {
+    font-family: inherit; font-size: 16px; padding: 10px 16px;
+    border: 1px solid #1f7a3d; background: #1f7a3d; color: #fff;
+    border-radius: 7px; cursor: pointer;
+  }
+  button:hover { background: #175e2f; border-color: #175e2f; }
+  button.secundario { background: #fff; color: #24507a; border-color: #9aa5b1; }
+  button.secundario:hover { background: #eef1f4; }
+  button.perigo { background: #b3261e; border-color: #8f1c16; }
+  button.perigo:hover { background: #8f1c16; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  input, select {
+    font-family: inherit; font-size: 16px; padding: 9px 10px;
+    border: 1.5px solid #9aa5b1; border-radius: 6px; background: #fff; color: #17201a;
+  }
+  input:focus, select:focus { outline: 3px solid #a7d8b6; border-color: #1f7a3d; }
+  label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; background: #fff; }
+  th, td { border: 1px solid #cbd2d9; padding: 8px 10px; text-align: left; }
+  th { background: #e7ece6; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+
+  .topo {
+    background: #17201a; color: #fff; padding: 10px 20px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  .topo .marca { font-size: 20px; font-weight: 700; }
+  .topo .info { font-size: 13px; opacity: .8; }
+  .topo-dir { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .compra-num { font-size: 14px; color: #aeb8af; }
+  .abas { display: flex; gap: 6px; }
+  .abas button { background: #2b3a30; border-color: #2b3a30; font-size: 14px; padding: 8px 14px; }
+  .abas button.ativa { background: #fff; color: #17201a; font-weight: 700; border-color: #fff; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 18px; }
+  #abaVenda.container { max-width: 1060px; padding: 0; display: flex; flex-direction: column; min-height: calc(100vh - 56px); }
+  .cartao { background: #fff; border: 1px solid #cbd2d9; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+
+  .linha-form { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+  .campo { flex: 1 1 160px; }
+  .campo.grande { flex: 2 1 260px; }
+
+  .resumo { display: flex; gap: 18px; flex-wrap: wrap; }
+  .resumo .bloco {
+    flex: 1 1 160px; background: #eef4f7; border: 1px solid #b6d4e0;
+    border-radius: 8px; padding: 12px 14px;
+  }
+  .resumo .bloco .rot { font-size: 13px; color: #4a5568; }
+  .resumo .bloco .val { font-size: 24px; font-weight: 700; color: #1a365d; }
+  .total-grande { background: #e7f3ea; border-color: #9ae0b0; }
+  .total-grande .val { font-size: 30px; color: #14532b; }
+
+  .aviso { background: #fffbe6; border: 1px solid #f0d98b; padding: 10px 14px; border-radius: 8px; margin: 14px 20px 0; }
+  .aviso.erro { background: #ffe6e6; border-color: #f0a0a0; }
+  .badge { display: inline-block; background: #b3261e; color: #fff; border-radius: 12px; padding: 2px 10px; font-size: 14px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%);
+    background: #17201a; color: #fff; padding: 14px 22px; border-radius: 8px;
+    font-size: 17px; box-shadow: 0 6px 24px rgba(0,0,0,.3); z-index: 60;
+  }
+
+  .oculto { display: none !important; }
+  .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .mini { font-size: 14px; color: #5c655d; }
+  fieldset { border: 1px solid #cbd2d9; border-radius: 8px; margin: 0 0 16px; padding: 14px; background: #fff; }
+  legend { font-weight: 700; padding: 0 6px; }
+
+  /* ====== aba Compra ====== */
+  .sec { padding: 14px 20px; }
+  .passo { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .passo .n {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%; background: #17201a; color: #fff;
+    font-size: 14px; font-weight: 600; flex: 0 0 auto;
+  }
+  .passo .t { font-size: 17px; font-weight: 600; }
+  .sec.trava .passo .n { background: #c2c8bf; }
+  .sec.trava .passo .t { color: #8a948b; }
+
+  .grid-mat { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+  .mat {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+    padding: 12px 13px; min-height: 62px; background: #fff; border: 1.5px solid #d3d7d0;
+    border-radius: 8px; cursor: pointer; text-align: left; position: relative; color: #17201a;
+  }
+  .mat:hover { border-color: #1f7a3d; background: #fff; }
+  .mat .mn { font-size: 16px; font-weight: 600; }
+  .mat .mp { font-size: 13px; color: #5c655d; }
+  .mat.sel { background: #e7f3ea; border: 2px solid #1f7a3d; padding: 11px 12px; }
+  .mat.sel .mn { font-weight: 700; color: #12481f; }
+  .mat.sel .mp { color: #1f7a3d; }
+  .mat .chk { position: absolute; top: 8px; right: 8px; display: none; }
+  .mat.sel .chk { display: flex; }
+
+  .acao {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    background: #fff; border: 2px solid #1f7a3d; border-radius: 10px; padding: 13px 16px;
+  }
+  .acao .malbl { font-size: 18px; font-weight: 700; color: #12481f; line-height: 1.15; }
+  .acao .maprc { font-size: 13px; color: #5c655d; }
+  .acao .grppeso { display: flex; align-items: center; gap: 10px; }
+  .acao .grppeso > span { font-size: 15px; color: #5c655d; }
+  #inPeso {
+    font-family: 'IBM Plex Mono', 'Consolas', monospace; font-size: 26px; font-weight: 600;
+    width: 130px; text-align: right; padding: 6px 10px; border: 2px solid #17201a;
+  }
+  .acao .eq { font-size: 22px; font-weight: 600; font-family: 'IBM Plex Mono', 'Consolas', monospace; color: #8a948b; }
+  #btnAdd { margin-left: auto; height: 54px; padding: 0 24px; font-size: 17px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+  .acao-off {
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    background: #eef0eb; border: 2px dashed #cfd3cc; border-radius: 10px; padding: 22px;
+    color: #8a948b; font-size: 16px;
+  }
+  .hint { font-size: 14px; color: #5c655d; margin-top: 9px; }
+  .hint.ok { color: #166534; background: #e7f3ea; border-radius: 7px; padding: 9px 12px; display: flex; align-items: center; gap: 8px; }
+
+  .secttl { font-size: 13px; font-weight: 600; color: #5c655d; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+  .lista { display: flex; flex-direction: column; gap: 6px; }
+  .rowlist {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: #fff; border: 1px solid #dde1da; border-radius: 8px; padding: 10px 14px;
+  }
+  .rowlist.novo { background: #e7f3ea; border: 1.5px solid #1f7a3d; }
+  .rowlist .flag { display: flex; flex: 0 0 auto; }
+  .rowlist .rm { font-size: 17px; font-weight: 600; flex: 1 1 150px; }
+  .rowlist .rc { font-size: 14px; color: #5c655d; font-family: 'IBM Plex Mono', 'Consolas', monospace; flex: 0 0 auto; }
+  .rowlist .rs { margin-left: auto; font-size: 19px; font-weight: 600; font-family: 'IBM Plex Mono', 'Consolas', monospace; }
+  .btn-rm { background: #fff; color: #b3261e; border: 1.5px solid #e6bcb8; border-radius: 7px; height: 40px; padding: 0 13px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-rm:hover { background: #fdeceb; border-color: #b3261e; }
+  .vazio { border: 1.5px dashed #cdd1c9; border-radius: 8px; padding: 34px; text-align: center; color: #8a948b; font-size: 16px; line-height: 1.7; }
+
+  .linha-sec { display: flex; gap: 4px; flex-wrap: wrap; padding: 0 20px 6px; }
+  .btn-quiet { background: transparent; border: none; color: #4a5568; font-size: 14px; padding: 6px 8px; text-decoration: underline; }
+  .btn-quiet:hover { background: transparent; color: #17201a; }
+  .btn-quiet.perigo-txt { color: #b3261e; }
+
+  .cli-toggle {
+    background: #eceee9; border: none; border-top: 1px solid #dde1da; padding: 12px 20px;
+    text-align: left; font-size: 15px; color: #3a453c; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; width: 100%;
+  }
+  .cli-toggle:hover { background: #e4e7e0; }
+  .cli-toggle .op { color: #95a096; }
+  #cliChevron { transition: transform .12s ease; }
+  .cli-toggle[aria-expanded="true"] #cliChevron { transform: rotate(90deg); }
+  .cli-panel { background: #fff; border-top: 1px solid #dde1da; padding: 16px 20px; }
+  .pays { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pay { height: 46px; padding: 0 18px; border-radius: 8px; border: 1.5px solid #d3d7d0; background: #fff; font-size: 15px; font-weight: 500; color: #17201a; }
+  .pay:hover { border-color: #1f7a3d; background: #fff; }
+  .pay.sel { background: #e7f3ea; border: 2px solid #1f7a3d; color: #12481f; font-weight: 600; }
+
+  .totbar {
+    position: sticky; bottom: 0; margin-top: auto; z-index: 20;
+    background: #17201a; color: #fff; padding: 12px 20px;
+    display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+    box-shadow: 0 -4px 16px rgba(0,0,0,.15);
+  }
+  .totbar .tl { font-size: 12px; color: #8f998f; text-transform: uppercase; letter-spacing: .6px; }
+  .totbar .ts { font-size: 14px; color: #aeb8af; font-family: 'IBM Plex Mono', 'Consolas', monospace; }
+  .totbar .tv { font-size: 40px; font-weight: 700; line-height: 1; }
+  .totbar .acts { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+  #btnFinalizarImprimir { background: #2fb457; color: #08260f; border-color: #2fb457; height: 56px; padding: 0 24px; font-size: 18px; font-weight: 700; display: inline-flex; align-items: center; gap: 10px; }
+  #btnFinalizarImprimir:hover { background: #29a34e; border-color: #29a34e; }
+  #btnFinalizarImprimir:disabled { background: #3c4a3f; color: #8a958c; border-color: #3c4a3f; }
+  #btnFinalizarSo { background: transparent; color: #cdd4ce; border: 1.5px solid #4a544c; height: 56px; }
+  #btnFinalizarSo:hover { background: rgba(255,255,255,.08); }
+  #btnFinalizarSo:disabled { opacity: .4; }
+
+  /* ====== impressão cupom 80mm ====== */
+  #areaImpressao { display: none; }
+  @media print {
+    body { background: #fff; }
+    #app { display: none !important; }
+    #areaImpressao {
+      display: block;
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.35;
+      color: #000;
+      width: 72mm;
+    }
+    #areaImpressao pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+    .corte { border-top: 1px dashed #000; margin: 6mm 0; }
+    @page { size: 72mm auto; margin: 4mm 3mm; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="topo">
+    <div>
+      <div class="marca" id="marcaTopo">Braço Forte Reciclagem</div>
+      <div class="info" id="infoTopo"></div>
+    </div>
+    <div class="topo-dir">
+      <span class="compra-num" id="numeroCompra"></span>
+      <div class="abas">
+        <button id="abaVendaBtn" class="ativa" onclick="mostrarAba('venda')">Compra</button>
+        <button id="abaAdmBtn" class="secundario" onclick="mostrarAba('adm')">Administração</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ABA COMPRA ================= -->
+  <div id="abaVenda" class="container">
+    <div id="semMateriais" class="aviso erro oculto">
+      Nenhum material cadastrado. Vá em <b>Administração</b> e cadastre os materiais e preços.
+    </div>
+
+    <div class="sec" style="padding-bottom:6px;">
+      <div class="passo"><span class="n">1</span><span class="t">Escolha o material</span></div>
+      <div class="grid-mat" id="gridMateriais"></div>
+    </div>
+
+    <div class="sec trava" id="secPeso" style="padding-top:8px;padding-bottom:8px;">
+      <div class="passo"><span class="n">2</span><span class="t">Peso do material</span></div>
+
+      <div class="acao oculto" id="acaoStrip">
+        <div>
+          <div class="malbl" id="acaoMat">—</div>
+          <div class="maprc mono" id="acaoPreco">R$ 0,00 / kg</div>
+        </div>
+        <div class="grppeso">
+          <span>Peso</span>
+          <input id="inPeso" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00">
+          <span>kg</span>
+        </div>
+        <div class="eq" id="acaoEq">= R$ 0,00</div>
+        <button id="btnAdd" onclick="adicionarItem()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>
+          Adicionar
+        </button>
+      </div>
+
+      <div class="acao-off" id="acaoOff">Escolha um material acima para informar o peso</div>
+
+      <div class="hint" id="hintAcao">Digite o peso lido na balança e tecle <b>Enter</b> — ou clique em <b>Adicionar</b>.</div>
+    </div>
+
+    <div class="sec" style="padding-top:6px;padding-bottom:8px;flex:1 1 auto;">
+      <div class="secttl">Materiais desta compra</div>
+      <div class="lista" id="listaItens"></div>
+      <div class="vazio" id="semItens">Nenhum material adicionado ainda.<br>Escolha o material e informe o peso para começar.</div>
+    </div>
+
+    <div class="linha-sec">
+      <button class="btn-quiet perigo-txt" onclick="limparCompra(true)">Cancelar compra</button>
+      <button class="btn-quiet" onclick="reimprimirUltima()">Reimprimir última</button>
+    </div>
+
+    <button class="cli-toggle" id="cliToggle" onclick="toggleCliente()" aria-expanded="false">
+      <svg id="cliChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      Dados do cliente e forma de pagamento <span class="op">(opcional)</span>
+    </button>
+
+    <div class="cli-panel oculto" id="cliPanel">
+      <div class="linha-form">
+        <div class="campo grande"><label for="inCliente">Nome do cliente</label><input id="inCliente" type="text" autocomplete="off"></div>
+        <div class="campo"><label for="inDoc">CPF / CNPJ / RG</label><input id="inDoc" type="text" autocomplete="off"></div>
+        <div class="campo"><label for="inPlaca">Placa do veículo</label><input id="inPlaca" type="text" autocomplete="off"></div>
+      </div>
+      <div style="margin-top:14px;">
+        <label>Forma de pagamento</label>
+        <div class="pays" id="paysWrap"></div>
+      </div>
+      <div class="campo grande" style="margin-top:14px;"><label for="inObs">Observação</label><input id="inObs" type="text" autocomplete="off"></div>
+    </div>
+
+    <div class="totbar">
+      <div>
+        <div class="tl">Total a pagar</div>
+        <div class="ts" id="stkResumo">Adicione ao menos 1 material</div>
+      </div>
+      <div class="tv mono" id="stkTotal">R$ 0,00</div>
+      <div class="acts">
+        <button id="btnFinalizarSo" class="secundario" onclick="finalizar(false)">Finalizar sem imprimir</button>
+        <button id="btnFinalizarImprimir" onclick="finalizar(true)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>
+          Imprimir e finalizar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ABA ADMINISTRAÇÃO ================= -->
+  <div id="abaAdm" class="container oculto">
+
+    <div id="loginAdm" class="cartao">
+      <h2>Administração</h2>
+      <p class="mini">Área protegida. Informe a senha.</p>
+      <div class="linha-form">
+        <div class="campo">
+          <label for="inSenha">Senha</label>
+          <input id="inSenha" type="password" autocomplete="off" onkeydown="if(event.key==='Enter')entrarAdm()">
+        </div>
+        <div class="campo" style="flex:0 0 auto;">
+          <label>&nbsp;</label>
+          <button onclick="entrarAdm()">Entrar</button>
+        </div>
+      </div>
+      <p id="erroSenha" class="mini" style="color:#b02b2b;"></p>
+      <p class="mini" id="dicaSenhaPadrao"></p>
+    </div>
+
+    <div id="painelAdm" class="oculto">
+
+      <div id="nExport" class="aviso oculto"></div>
+
+      <fieldset>
+        <legend>Materiais e preços</legend>
+        <table id="tabelaMateriais">
+          <thead>
+            <tr><th>Material</th><th class="num">Preço por kg (R$)</th><th>Ativo</th><th></th></tr>
+          </thead>
+          <tbody id="corpoMateriais"></tbody>
+        </table>
+        <div class="acoes">
+          <button class="secundario" onclick="addLinhaMaterial()">➕ Adicionar material</button>
+          <button onclick="salvarMateriais()">💾 Salvar materiais</button>
+          <button class="secundario" onclick="exportarMateriais()">⬇️ Exportar materiais (JSON)</button>
+          <button class="perigo" onclick="restaurarMateriaisPadrao()">↻ Restaurar lista padrão (36 itens)</button>
+        </div>
+        <p class="mini">O preço aceita centavos (ex: 0,15). Desmarque "Ativo" para esconder um material da tela de compra sem apagar o histórico.
+        Toda alteração de preço, nome ou exclusão fica gravada no <b>Registro de alterações</b> abaixo.<br>
+        <b>Restaurar lista padrão</b> apaga o cadastro atual e volta para os 36 materiais originais com os preços combinados.
+        A lista de materiais também vai dentro do <b>Exportar TUDO</b>.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Dados da empresa (cabeçalho do cupom)</legend>
+        <div class="linha-form">
+          <div class="campo grande"><label>Nome</label><input id="cfgNome" type="text"></div>
+          <div class="campo"><label>CNPJ</label><input id="cfgCnpj" type="text"></div>
+        </div>
+        <div class="linha-form" style="margin-top:10px;">
+          <div class="campo grande"><label>Endereço</label><input id="cfgEndereco" type="text"></div>
+          <div class="campo"><label>Telefone</label><input id="cfgTelefone" type="text"></div>
+        </div>
+        <div class="campo grande" style="margin-top:10px;"><label>Rodapé do cupom</label><input id="cfgRodape" type="text" placeholder="ex: Obrigado pela preferência!"></div>
+        <div class="acoes"><button onclick="salvarEmpresa()">💾 Salvar dados da empresa</button></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Segurança</legend>
+        <div class="linha-form">
+          <div class="campo"><label>Nova senha</label><input id="novaSenha1" type="password" autocomplete="off"></div>
+          <div class="campo"><label>Repetir nova senha</label><input id="novaSenha2" type="password" autocomplete="off"></div>
+          <div class="campo" style="flex:0 0 auto;"><label>&nbsp;</label><button onclick="trocarSenha()">Trocar senha</button></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Relatórios</legend>
+        <div class="linha-form">
+          <div class="campo"><label>De</label><input id="relDe" type="date"></div>
+          <div class="campo"><label>Até</label><input id="relAte" type="date"></div>
+          <div class="campo" style="flex:0 0 auto;"><label>&nbsp;</label><button onclick="gerarRelatorio()">Gerar</button></div>
+        </div>
+        <div id="saidaRelatorio" style="margin-top:14px;"></div>
+        <div class="acoes">
+          <button class="secundario" onclick="exportarRelatorioCSV()">⬇️ Exportar CSV (Excel)</button>
+          <button class="secundario" onclick="exportarRelatorioJSON()">⬇️ Exportar JSON do período</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Registro de alterações (log)</legend>
+        <p class="mini" id="logContagem"></p>
+        <div style="max-height:340px;overflow:auto;border:1px solid #cbd2d9;border-radius:6px;">
+          <table><thead><tr><th class="num">Data / hora</th><th>Ação</th></tr></thead>
+          <tbody id="corpoLog"></tbody></table>
+        </div>
+        <div class="acoes">
+          <button class="secundario" onclick="exportarLog()">⬇️ Exportar log completo (JSON)</button>
+        </div>
+        <p class="mini">Grava alteração de preço, nome, ativação/remoção de material, exclusão de compras, troca de senha, mudança nos dados da empresa e importação de backup — com data e hora. Também vai dentro do <b>Exportar TUDO</b>.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Backup (para subir na nuvem)</legend>
+        <p class="mini">Exporte o arquivo JSON com <b>tudo</b> (compras + materiais + configuração + registro de alterações) e guarde na nuvem. Recomendado fazer todo dia no fim do expediente.</p>
+        <div class="acoes">
+          <button onclick="exportarTudo()">⬇️ Exportar TUDO (JSON)</button>
+          <button class="secundario" onclick="document.getElementById('inImport').click()">⬆️ Importar / restaurar JSON</button>
+          <input id="inImport" type="file" accept=".json,application/json" class="oculto" onchange="importarArquivo(event)">
+        </div>
+        <p class="mini" id="statusExport"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Manutenção</legend>
+        <div class="acoes">
+          <button class="perigo" onclick="apagarComprasAntigas()">Apagar compras anteriores a uma data…</button>
+        </div>
+        <p class="mini">Use só depois de confirmar que o backup na nuvem está salvo.</p>
+      </fieldset>
+
+    </div>
+  </div>
+</div>
+
+<!-- área que vai para a impressora térmica -->
+<div id="areaImpressao"></div>
+
+<script>
+/* =========================================================
+   Braço Forte Reciclagem - app local (1 arquivo, sem internet)
+   Armazenamento: localStorage do navegador
+   Backup: exportação/importação de JSON
+   ========================================================= */
+
+var K = { cfg:'bfr_config', mat:'bfr_materiais', vend:'bfr_vendas', meta:'bfr_meta', log:'bfr_log' };
+
+/* ---------- utilitários ---------- */
+function qsa(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+function setOculto(el, oculto){
+  if (typeof el === 'string') el = document.getElementById(el);
+  if (!el) return;
+  if (oculto) el.classList.add('oculto'); else el.classList.remove('oculto');
+}
+function rep(c,n){ var o=''; for(var i=0;i<n;i++) o+=c; return o; }
+function z(n){ return n<10 ? '0'+n : ''+n; }
+function hoje(){ return new Date(); }
+function fmtData(d){ return z(d.getDate())+'/'+z(d.getMonth()+1)+'/'+d.getFullYear(); }
+function fmtHora(d){ return z(d.getHours())+':'+z(d.getMinutes()); }
+function isoDia(d){ return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function parseNum(s){
+  if (s === null || s === undefined) return NaN;
+  s = String(s).replace(/\s/g,'').replace(/\./g, function(m,i,str){ return str.indexOf(',')>-1 ? '' : '.'; });
+  s = s.replace(',', '.');
+  return parseFloat(s);
+}
+function fmtBRL(n){
+  n = Math.round((Number(n)+Number.EPSILON)*100)/100;
+  var neg = n < 0; n = Math.abs(n);
+  var s = n.toFixed(2).split('.');
+  s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return (neg?'-':'') + 'R$ ' + s[0] + ',' + s[1];
+}
+function fmtNum(n, dec){
+  return Number(n).toFixed(dec||0).replace('.', ',');
+}
+function hash(s){
+  var h = 5381;
+  for (var i=0;i<s.length;i++){ h = ((h<<5)+h) + s.charCodeAt(i); h = h & 0xffffffff; }
+  return (h>>>0).toString(16);
+}
+function ler(k, padrao){
+  try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : padrao; }
+  catch(e){ return padrao; }
+}
+function gravar(k, v){
+  try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+  catch(e){ alert('ERRO ao salvar no computador: '+e.message+'\n\nFaça um backup (Exportar TUDO) o quanto antes.'); return false; }
+}
+function toast(msg){
+  var t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ if (t.parentNode) t.parentNode.removeChild(t); }, 3000);
+}
+function baixarArquivo(nome, texto, tipo){
+  var blob = new Blob([texto], { type: tipo || 'application/json;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+
+/* ---------- estado ---------- */
+var config, materiais, vendas, meta, registros;
+var itensAtual = [];
+var admLiberado = false;
+
+/* ---------- registro de alterações (log) ---------- */
+function registrar(tipo, desc, detalhe){
+  if (!registros) registros = [];
+  registros.push({ ts: hoje().toISOString(), tipo: tipo, desc: desc, detalhe: detalhe || null });
+  if (registros.length > 3000) registros = registros.slice(registros.length - 3000);
+  gravar(K.log, registros);
+  if (typeof renderLog === 'function' && admLiberado) renderLog();
+}
+
+var MATERIAIS_PADRAO = [
+  { nome:'Cobre mel',                        preco:54.00 },
+  { nome:'Cobre misto',                      preco:50.00 },
+  { nome:'Cobre de 4mm',                     preco:35.00 },
+  { nome:'Metal',                            preco:25.00 },
+  { nome:'Latinha',                          preco:10.60 },
+  { nome:'Panela limpa',                     preco:9.00 },
+  { nome:'Panela suja',                      preco:7.00 },
+  { nome:'Alumínio mole limpo',              preco:6.00 },
+  { nome:'Alumínio mole sujo',               preco:3.50 },
+  { nome:'Alumínio duro limpo',              preco:5.00 },
+  { nome:'Alumínio duro sujo',               preco:2.50 },
+  { nome:'Perfil limpo',                     preco:11.00 },
+  { nome:'Perfil sujo',                      preco:8.00 },
+  { nome:'Perfil colorido limpo',            preco:8.00 },
+  { nome:'Perfil colorido sujo',             preco:6.00 },
+  { nome:'Sucata',                           preco:0.40 },
+  { nome:'Inox',                             preco:2.00 },
+  { nome:'Inox ferroso',                     preco:0.40 },
+  { nome:'Antimônio',                        preco:5.00 },
+  { nome:'Pet',                              preco:2.50 },
+  { nome:'PEAD',                             preco:1.50 },
+  { nome:'Balde / bacia',                    preco:0.40 },
+  { nome:'Papelão',                          preco:0.50 },
+  { nome:'Papel branco',                     preco:0.25 },
+  { nome:'Cristal',                          preco:0.70 },
+  { nome:'Placa eletrônica marrom',          preco:4.00 },
+  { nome:'Placa eletrônica intermediária',   preco:7.00 },
+  { nome:'Placa leve',                       preco:12.00 },
+  { nome:'Bateria',                          preco:2.50 },
+  { nome:'Fio com capa bom',                 preco:10.00 },
+  { nome:'Fio com capa ruim',                preco:6.00 },
+  { nome:'Roda liga leve',                   preco:7.00 },
+  { nome:'Radiador',                         preco:4.00 },
+  { nome:'Motor de geladeira',               preco:1.00 },
+  { nome:'TV LED nova',                      preco:10.00 },
+  { nome:'Óleo (por litro)',                 preco:1.50 }
+];
+
+var SEED_MATERIAIS_VERSAO = 2;
+function semearMateriais(){
+  return MATERIAIS_PADRAO.map(function(m,i){ return { id:'m'+(i+1), nome:m.nome, preco:m.preco, ativo:true }; });
+}
+function carregar(){
+  config = ler(K.cfg, null);
+  if (!config){
+    config = {
+      nome:'Braço Forte Reciclagem', cnpj:'', endereco:'', telefone:'',
+      rodape:'Obrigado pela preferência!',
+      senhaHash: hash('admin'), senhaPadrao:true,
+      proximoNumero: 1, materiaisSeed: SEED_MATERIAIS_VERSAO
+    };
+    gravar(K.cfg, config);
+  }
+  vendas = ler(K.vend, []);
+  materiais = ler(K.mat, null);
+  if (!materiais){
+    materiais = semearMateriais();
+    config.materiaisSeed = SEED_MATERIAIS_VERSAO;
+    gravar(K.mat, materiais); gravar(K.cfg, config);
+  } else if ((config.materiaisSeed || 1) < SEED_MATERIAIS_VERSAO && vendas.length === 0){
+    /* nenhuma compra registrada ainda: dá pra atualizar a lista padrão com segurança */
+    materiais = semearMateriais();
+    config.materiaisSeed = SEED_MATERIAIS_VERSAO;
+    gravar(K.mat, materiais); gravar(K.cfg, config);
+  }
+  meta = ler(K.meta, { exportadasAte:0, ultimoExport:null });
+  registros = ler(K.log, []);
+}
+
+/* ---------- navegação abas ---------- */
+function bloquearAdm(){
+  admLiberado = false;
+  setOculto('loginAdm', false);
+  setOculto('painelAdm', true);
+  var s = document.getElementById('inSenha'); if (s) s.value = '';
+  var e = document.getElementById('erroSenha'); if (e) e.textContent = '';
+}
+function mostrarAba(qual){
+  if (qual !== 'adm' && admLiberado) bloquearAdm();
+  setOculto('abaVenda', qual!=='venda');
+  setOculto('abaAdm', qual!=='adm');
+  document.getElementById('abaVendaBtn').className = 'secundario' + (qual==='venda'?' ativa':'');
+  document.getElementById('abaAdmBtn').className = 'secundario' + (qual==='adm'?' ativa':'');
+  if (qual==='adm'){
+    if (admLiberado) atualizarBadgeExport();
+    else { var s = document.getElementById('inSenha'); if (s) s.focus(); }
+  }
+}
+
+/* ---------- tela de compra ---------- */
+function materiaisAtivos(){
+  return materiais.filter(function(m){ return m.ativo; })
+                  .sort(function(a,b){ return a.nome.localeCompare(b.nome, 'pt-BR'); });
+}
+function materialPorId(id){
+  for (var i=0;i<materiais.length;i++) if (materiais[i].id===id) return materiais[i];
+  return null;
+}
+
+/* estado da compra em andamento */
+var materialSelId = null;
+var pagamentoSel = 'Dinheiro';
+var seqItem = 0;
+var ultimoItemId = null;
+var PAGAMENTOS = ['Dinheiro','PIX','Transferência','Cheque','A pagar'];
+
+var SVG_CHECK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f7a3d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5-6"/></svg>';
+var SVG_TRASH = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>';
+
+function renderGridMateriais(){
+  var grid = document.getElementById('gridMateriais');
+  var ativos = materiaisAtivos();
+  grid.innerHTML = '';
+  ativos.forEach(function(m){
+    var b = document.createElement('button');
+    b.className = 'mat' + (m.id===materialSelId ? ' sel' : '');
+    b.setAttribute('data-id', m.id);
+    b.innerHTML = '<span class="mn"></span><span class="mp mono"></span><span class="chk">'+SVG_CHECK+'</span>';
+    b.querySelector('.mn').textContent = m.nome;
+    b.querySelector('.mp').textContent = fmtBRL(m.preco) + '/kg';
+    b.onclick = function(){ selecionarMaterial(m.id); };
+    grid.appendChild(b);
+  });
+  setOculto('semMateriais', ativos.length>0);
+  if (materialSelId && !ativos.some(function(m){ return m.id===materialSelId; })) {
+    materialSelId = null;
+    setOculto('acaoStrip', true);
+    setOculto('acaoOff', false);
+    document.getElementById('secPeso').classList.add('trava');
+  }
+}
+function selecionarMaterial(id){
+  var m = materialPorId(id);
+  if (!m) return;
+  materialSelId = id;
+  ultimoItemId = null;
+  qsa('#gridMateriais .mat').forEach(function(b){
+    b.className = 'mat' + (b.getAttribute('data-id')===id ? ' sel' : '');
+  });
+  document.getElementById('secPeso').classList.remove('trava');
+  setOculto('acaoStrip', false);
+  setOculto('acaoOff', true);
+  document.getElementById('acaoMat').textContent = m.nome;
+  document.getElementById('acaoPreco').textContent = fmtBRL(m.preco) + ' / kg';
+  var inp = document.getElementById('inPeso');
+  inp.value = '';
+  resetHint();
+  atualizarConta();
+  renderItens();
+  inp.focus();
+}
+function resetHint(){
+  var h = document.getElementById('hintAcao');
+  h.className = 'hint';
+  h.innerHTML = 'Digite o peso lido na balança e tecle <b>Enter</b> — ou clique em <b>Adicionar</b>.';
+}
+function atualizarConta(){
+  var m = materialPorId(materialSelId);
+  var p = parseNum(document.getElementById('inPeso').value);
+  var eq = document.getElementById('acaoEq');
+  if (m && !isNaN(p) && p>0){
+    eq.textContent = '= ' + fmtBRL(p*m.preco);
+    eq.style.color = '#17201a';
+  } else {
+    eq.textContent = '= R$ 0,00';
+    eq.style.color = '#8a948b';
+  }
+}
+function adicionarItem(){
+  var m = materialPorId(materialSelId);
+  var campoPeso = document.getElementById('inPeso');
+  var p = parseNum(campoPeso.value);
+  var h = document.getElementById('hintAcao');
+  if (!m){ toast('Escolha um material primeiro'); return; }
+  if (isNaN(p) || p<=0){
+    h.className = 'hint';
+    h.innerHTML = '<b style="color:#b3261e;">Digite o peso em kg</b> (ex: 12,5) e tecle Enter.';
+    campoPeso.focus();
+    return;
+  }
+  var sub = Math.round(p * m.preco * 100) / 100;
+  seqItem += 1;
+  var it = { id:seqItem, materialId:m.id, nome:m.nome, preco:m.preco, peso:p, subtotal:sub };
+  itensAtual.push(it);
+  ultimoItemId = it.id;
+  campoPeso.value = '';
+  atualizarConta();
+  h.className = 'hint ok';
+  h.innerHTML = SVG_CHECK + ' <span><b>' + m.nome + ' — ' + fmtNum(p,3) + ' kg</b> adicionado (' + fmtBRL(sub) + '). Pese a próxima carga ou escolha outro material.</span>';
+  renderItens();
+  campoPeso.focus();
+}
+function removerItem(id){
+  itensAtual = itensAtual.filter(function(it){ return it.id!==id; });
+  if (ultimoItemId===id) ultimoItemId = null;
+  renderItens();
+}
+function renderItens(){
+  var wrap = document.getElementById('listaItens');
+  wrap.innerHTML = '';
+  itensAtual.slice().reverse().forEach(function(it){
+    var row = document.createElement('div');
+    row.className = 'rowlist' + (it.id===ultimoItemId ? ' novo' : '');
+    row.innerHTML =
+      (it.id===ultimoItemId ? '<span class="flag">'+SVG_CHECK+'</span>' : '') +
+      '<span class="rm"></span>' +
+      '<span class="rc">' + fmtNum(it.peso,3) + ' kg × ' + fmtBRL(it.preco) + '</span>' +
+      '<span class="rs">' + fmtBRL(it.subtotal) + '</span>';
+    row.querySelector('.rm').textContent = it.nome;
+    var btn = document.createElement('button');
+    btn.className = 'btn-rm';
+    btn.innerHTML = SVG_TRASH + 'Remover';
+    btn.onclick = function(){ removerItem(it.id); };
+    row.appendChild(btn);
+    wrap.appendChild(row);
+  });
+  setOculto('semItens', itensAtual.length>0);
+
+  var peso = itensAtual.reduce(function(s,it){ return s+it.peso; }, 0);
+  var total = itensAtual.reduce(function(s,it){ return s+it.subtotal; }, 0);
+  document.getElementById('stkTotal').textContent = fmtBRL(total);
+  document.getElementById('stkResumo').textContent = itensAtual.length===0
+    ? 'Adicione ao menos 1 material'
+    : itensAtual.length + (itensAtual.length===1 ? ' item · ' : ' itens · ') + fmtNum(peso,3) + ' kg';
+
+  var pode = itensAtual.length>0;
+  document.getElementById('btnFinalizarImprimir').disabled = !pode;
+  document.getElementById('btnFinalizarSo').disabled = !pode;
+}
+function renderPagamentos(){
+  var w = document.getElementById('paysWrap');
+  w.innerHTML = '';
+  PAGAMENTOS.forEach(function(v){
+    var b = document.createElement('button');
+    b.className = 'pay' + (v===pagamentoSel ? ' sel' : '');
+    b.textContent = v;
+    b.onclick = function(){ pagamentoSel = v; renderPagamentos(); };
+    w.appendChild(b);
+  });
+}
+function toggleCliente(){
+  var abrir = document.getElementById('cliPanel').classList.contains('oculto');
+  setOculto('cliPanel', !abrir);
+  document.getElementById('cliToggle').setAttribute('aria-expanded', abrir ? 'true' : 'false');
+}
+function fecharCliente(){
+  setOculto('cliPanel', true);
+  document.getElementById('cliToggle').setAttribute('aria-expanded', 'false');
+}
+function limparCompra(perguntar){
+  if (perguntar && itensAtual.length>0 && !confirm('Cancelar esta compra e apagar todos os itens?')) return;
+  itensAtual = [];
+  ultimoItemId = null;
+  materialSelId = null;
+  pagamentoSel = 'Dinheiro';
+  ['inCliente','inDoc','inPlaca','inObs','inPeso'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  qsa('#gridMateriais .mat').forEach(function(b){ b.className = 'mat'; });
+  setOculto('acaoStrip', true);
+  setOculto('acaoOff', false);
+  document.getElementById('secPeso').classList.add('trava');
+  renderPagamentos();
+  fecharCliente();
+  resetHint();
+  atualizarConta();
+  renderItens();
+}
+function atualizarNumeroCompra(){
+  document.getElementById('numeroCompra').textContent =
+    'Compra Nº ' + z(config.proximoNumero) + ' · ' + fmtData(hoje());
+}
+
+/* ---------- finalizar ---------- */
+function finalizar(imprimir){
+  if (itensAtual.length===0){ alert('Adicione ao menos um material.'); return; }
+  var agora = hoje();
+  var peso = itensAtual.reduce(function(s,it){ return s+it.peso; }, 0);
+  var total = itensAtual.reduce(function(s,it){ return s+it.subtotal; }, 0);
+  var venda = {
+    numero: config.proximoNumero,
+    data: agora.toISOString(),
+    itens: itensAtual.map(function(it){ return { materialId:it.materialId, nome:it.nome, preco:it.preco, peso:it.peso, subtotal:it.subtotal }; }),
+    pesoTotal: Math.round(peso*1000)/1000,
+    total: Math.round(total*100)/100,
+    cliente: document.getElementById('inCliente').value.trim(),
+    doc: document.getElementById('inDoc').value.trim(),
+    placa: document.getElementById('inPlaca').value.trim().toUpperCase(),
+    pagamento: pagamentoSel,
+    obs: document.getElementById('inObs').value.trim()
+  };
+  vendas.push(venda);
+  config.proximoNumero += 1;
+  gravar(K.vend, vendas);
+  gravar(K.cfg, config);
+
+  if (imprimir) imprimirVenda(venda);
+  toast('Compra Nº '+venda.numero+' salva'+(imprimir?' — enviando para impressão':''));
+  limparCompra(false);
+  atualizarNumeroCompra();
+  try { window.scrollTo(0, 0); } catch(e){}
+}
+function reimprimirUltima(){
+  if (vendas.length===0){ alert('Nenhuma compra registrada ainda.'); return; }
+  imprimirVenda(vendas[vendas.length-1]);
+}
+
+/* ---------- montar cupom 80mm ---------- */
+var LARG = 32;
+function centro(t){
+  t = String(t);
+  if (t.length>=LARG) return t;
+  return rep(' ', Math.floor((LARG-t.length)/2)) + t;
+}
+function esqDir(e, d){
+  e = String(e); d = String(d);
+  var espaco = LARG - e.length - d.length;
+  if (espaco < 1) return e + ' ' + d;
+  return e + rep(' ', espaco) + d;
+}
+function quebrar(txt){
+  var palavras = String(txt).split(/\s+/), linhas = [], atual = '';
+  palavras.forEach(function(p){
+    if (!atual) { atual = p; }
+    else if ((atual+' '+p).length <= LARG) { atual += ' '+p; }
+    else { linhas.push(atual); atual = p; }
+  });
+  if (atual) linhas.push(atual);
+  return linhas;
+}
+function via(venda, tipo){
+  var d = new Date(venda.data);
+  var L = [];
+  if (config.nome) L.push(centro(config.nome));
+  if (config.endereco) quebrar(config.endereco).forEach(function(l){ L.push(centro(l)); });
+  if (config.cnpj) L.push(centro('CNPJ: '+config.cnpj));
+  if (config.telefone) L.push(centro('Tel: '+config.telefone));
+  L.push(rep('-', LARG));
+  L.push('COMPRA DE MATERIAL  Nº '+z(venda.numero));
+  L.push(fmtData(d)+'  '+fmtHora(d));
+  L.push('VIA: '+tipo);
+  L.push(rep('-', LARG));
+  venda.itens.forEach(function(it){
+    L.push(it.nome);
+    L.push(esqDir('  '+fmtNum(it.peso,3)+'kg x '+fmtBRL(it.preco), fmtBRL(it.subtotal)));
+  });
+  L.push(rep('-', LARG));
+  L.push(esqDir('PESO TOTAL:', fmtNum(venda.pesoTotal,3)+' kg'));
+  L.push(esqDir('VALOR TOTAL:', fmtBRL(venda.total)));
+  L.push(rep('-', LARG));
+  L.push('Pagamento: '+venda.pagamento);
+  if (venda.cliente) L.push('Cliente: '+venda.cliente);
+  if (venda.doc)     L.push('Doc: '+venda.doc);
+  if (venda.placa)   L.push('Placa: '+venda.placa);
+  if (venda.obs)     L.push('Obs: '+venda.obs);
+  L.push('');
+  L.push('Assinatura do cliente:');
+  L.push('');
+  L.push(rep('_', LARG));
+  L.push('');
+  if (config.rodape) L.push(centro(config.rodape));
+  L.push(centro('* '+tipo+' *'));
+  return L.join('\n');
+}
+function imprimirVenda(venda){
+  var area = document.getElementById('areaImpressao');
+  area.innerHTML = '';
+  var p1 = document.createElement('pre'); p1.textContent = via(venda, 'RECICLAGEM');
+  var corte = document.createElement('div'); corte.className = 'corte';
+  var p2 = document.createElement('pre'); p2.textContent = via(venda, 'CLIENTE');
+  area.appendChild(p1); area.appendChild(corte); area.appendChild(p2);
+  setTimeout(function(){ window.print(); }, 150);
+}
+
+/* ---------- administração ---------- */
+function entrarAdm(){
+  var s = document.getElementById('inSenha').value;
+  if (hash(s) === config.senhaHash){
+    admLiberado = true;
+    document.getElementById('inSenha').value = '';
+    document.getElementById('erroSenha').textContent = '';
+    document.getElementById('loginAdm').classList.add('oculto');
+    document.getElementById('painelAdm').classList.remove('oculto');
+    renderMateriaisAdm();
+    preencherEmpresa();
+    prepararDatasRelatorio();
+    atualizarBadgeExport();
+    renderLog();
+  } else {
+    document.getElementById('erroSenha').textContent = 'Senha incorreta.';
+  }
+}
+function renderLog(){
+  var tb = document.getElementById('corpoLog');
+  if (!tb) return;
+  tb.innerHTML = '';
+  var lista = registros.slice().sort(function(a,b){ return new Date(b.ts) - new Date(a.ts); }).slice(0, 100);
+  if (lista.length === 0){
+    tb.innerHTML = '<tr><td colspan="2" class="mini">Nenhuma alteração registrada ainda.</td></tr>';
+  } else {
+    lista.forEach(function(r){
+      var d = new Date(r.ts);
+      var tr = document.createElement('tr');
+      var td1 = document.createElement('td'); td1.className = 'num'; td1.style.whiteSpace = 'nowrap';
+      td1.textContent = fmtData(d) + ' ' + fmtHora(d);
+      var td2 = document.createElement('td'); td2.textContent = r.desc;
+      tr.appendChild(td1); tr.appendChild(td2);
+      tb.appendChild(tr);
+    });
+  }
+  var c = document.getElementById('logContagem');
+  if (c) c.textContent = registros.length + ' registro(s) no total' + (registros.length > 100 ? ' — mostrando os 100 mais recentes' : '');
+}
+function exportarLog(){
+  var d = hoje();
+  var obj = { app:'braco-forte-reciclagem', tipo:'log', geradoEm:d.toISOString(),
+              empresa:{ nome:config.nome }, registros: registros };
+  baixarArquivo('reciclagem_log_' + isoDia(d) + '_' + z(d.getHours()) + z(d.getMinutes()) + '.json', JSON.stringify(obj, null, 2));
+}
+function exportarMateriais(){
+  var d = hoje();
+  var obj = { app:'braco-forte-reciclagem', tipo:'materiais', geradoEm:d.toISOString(), materiais: materiais };
+  baixarArquivo('reciclagem_materiais_' + isoDia(d) + '.json', JSON.stringify(obj, null, 2));
+}
+function renderMateriaisAdm(){
+  var tb = document.getElementById('corpoMateriais');
+  tb.innerHTML = '';
+  materiais.forEach(function(m){ tb.appendChild(linhaMaterial(m)); });
+}
+function linhaMaterial(m){
+  var tr = document.createElement('tr');
+  tr.setAttribute('data-id', m ? m.id : '');
+  var tdNome = document.createElement('td');
+  var inNome = document.createElement('input'); inNome.type='text'; inNome.value = m?m.nome:''; inNome.style.width='100%';
+  inNome.className = 'mNome'; tdNome.appendChild(inNome);
+  var tdPreco = document.createElement('td'); tdPreco.className='num';
+  var inPreco = document.createElement('input'); inPreco.type='text'; inPreco.inputMode='decimal';
+  inPreco.value = m ? fmtNum(m.preco,2) : ''; inPreco.style.width='120px'; inPreco.style.textAlign='right';
+  inPreco.className = 'mPreco'; tdPreco.appendChild(inPreco);
+  var tdAtivo = document.createElement('td');
+  var inAtivo = document.createElement('input'); inAtivo.type='checkbox'; inAtivo.checked = m ? m.ativo : true;
+  inAtivo.className = 'mAtivo'; tdAtivo.appendChild(inAtivo);
+  var tdDel = document.createElement('td'); tdDel.className='num';
+  var btn = document.createElement('button'); btn.className='perigo'; btn.textContent='remover'; btn.style.padding='4px 10px';
+  btn.onclick = function(){
+    if (m && vendaUsaMaterial(m.id)){
+      alert('Este material já foi usado em compras. Em vez de remover, desmarque "Ativo".');
+      return;
+    }
+    tr.parentNode.removeChild(tr);
+  };
+  tdDel.appendChild(btn);
+  tr.appendChild(tdNome); tr.appendChild(tdPreco); tr.appendChild(tdAtivo); tr.appendChild(tdDel);
+  return tr;
+}
+function addLinhaMaterial(){
+  document.getElementById('corpoMateriais').appendChild(linhaMaterial(null));
+}
+function restaurarMateriaisPadrao(){
+  if (!confirm('Isto vai APAGAR o cadastro de materiais atual e recolocar os 36 materiais padrão com os preços combinados.\n\nO histórico de compras NÃO é afetado. Continuar?')) return;
+  materiais = semearMateriais();
+  config.materiaisSeed = SEED_MATERIAIS_VERSAO;
+  gravar(K.mat, materiais);
+  gravar(K.cfg, config);
+  registrar('materiais_restaurados', 'Lista de materiais restaurada para o padrão (' + materiais.length + ' itens)', null);
+  renderMateriaisAdm();
+  renderGridMateriais();
+  toast(materiais.length + ' materiais padrão restaurados');
+}
+function vendaUsaMaterial(id){
+  return vendas.some(function(v){ return v.itens.some(function(it){ return it.materialId===id; }); });
+}
+function salvarMateriais(){
+  var linhas = qsa('#corpoMateriais tr');
+  var novos = [];
+  var erro = null;
+  var seq = 1;
+  linhas.forEach(function(tr){
+    var nome = tr.querySelector('.mNome').value.trim();
+    var preco = parseNum(tr.querySelector('.mPreco').value);
+    var ativo = tr.querySelector('.mAtivo').checked;
+    var id = tr.getAttribute('data-id');
+    if (!nome && isNaN(preco)) return;
+    if (!nome){ erro = 'Há um material sem nome.'; return; }
+    if (isNaN(preco) || preco<0){ erro = 'Preço inválido em "'+nome+'".'; return; }
+    if (!id){ do { id = 'm'+(Date.now().toString(36))+seq; seq++; } while (novos.some(function(x){return x.id===id;})); }
+    novos.push({ id:id, nome:nome, preco:Math.round(preco*10000)/10000, ativo:ativo });
+  });
+  if (erro){ alert(erro); return; }
+  if (novos.length===0){ alert('Cadastre ao menos um material.'); return; }
+
+  /* registra o que mudou */
+  var antigos = {};
+  materiais.forEach(function(m){ antigos[m.id] = m; });
+  var vistos = {};
+  novos.forEach(function(n){
+    vistos[n.id] = true;
+    var a = antigos[n.id];
+    if (!a){
+      registrar('material_novo', 'Material cadastrado: ' + n.nome + ' (' + fmtBRL(n.preco) + '/kg)', { id:n.id, nome:n.nome, preco:n.preco });
+      return;
+    }
+    if (Math.round(a.preco*10000) !== Math.round(n.preco*10000)){
+      registrar('preco', 'Preço alterado: ' + n.nome + ' de ' + fmtBRL(a.preco) + ' para ' + fmtBRL(n.preco) + ' por kg',
+                { id:n.id, nome:n.nome, de:a.preco, para:n.preco });
+    }
+    if (a.nome !== n.nome){
+      registrar('material_renomeado', 'Material renomeado: "' + a.nome + '" para "' + n.nome + '"', { id:n.id, de:a.nome, para:n.nome });
+    }
+    if (!!a.ativo !== !!n.ativo){
+      registrar('material_ativo', 'Material ' + (n.ativo ? 'reativado' : 'desativado') + ': ' + n.nome, { id:n.id, nome:n.nome, ativo:n.ativo });
+    }
+  });
+  materiais.forEach(function(a){
+    if (!vistos[a.id]) registrar('material_removido', 'Material removido: ' + a.nome + ' (' + fmtBRL(a.preco) + '/kg)', { id:a.id, nome:a.nome, preco:a.preco });
+  });
+
+  materiais = novos;
+  config.materiaisSeed = SEED_MATERIAIS_VERSAO;
+  gravar(K.mat, materiais);
+  gravar(K.cfg, config);
+  renderMateriaisAdm();
+  renderGridMateriais();
+  toast('Materiais salvos');
+}
+function preencherEmpresa(){
+  document.getElementById('cfgNome').value = config.nome || '';
+  document.getElementById('cfgCnpj').value = config.cnpj || '';
+  document.getElementById('cfgEndereco').value = config.endereco || '';
+  document.getElementById('cfgTelefone').value = config.telefone || '';
+  document.getElementById('cfgRodape').value = config.rodape || '';
+}
+function salvarEmpresa(){
+  var campos = [['nome','cfgNome','Nome'],['cnpj','cfgCnpj','CNPJ'],['endereco','cfgEndereco','Endereço'],['telefone','cfgTelefone','Telefone'],['rodape','cfgRodape','Rodapé']];
+  var mudou = [];
+  campos.forEach(function(c){
+    var novo = document.getElementById(c[1]).value.trim();
+    if ((config[c[0]] || '') !== novo){ mudou.push(c[2]); config[c[0]] = novo; }
+  });
+  gravar(K.cfg, config);
+  if (mudou.length) registrar('empresa', 'Dados da empresa alterados: ' + mudou.join(', '), null);
+  aplicarMarca();
+  toast('Dados da empresa salvos');
+}
+function trocarSenha(){
+  var a = document.getElementById('novaSenha1').value;
+  var b = document.getElementById('novaSenha2').value;
+  if (a.length < 3){ alert('A senha precisa ter ao menos 3 caracteres.'); return; }
+  if (a !== b){ alert('As senhas não conferem.'); return; }
+  config.senhaHash = hash(a);
+  config.senhaPadrao = false;
+  gravar(K.cfg, config);
+  registrar('senha', 'Senha de administração alterada', null);
+  document.getElementById('novaSenha1').value = '';
+  document.getElementById('novaSenha2').value = '';
+  atualizarDicaSenha();
+  toast('Senha alterada');
+}
+function atualizarDicaSenha(){
+  var el = document.getElementById('dicaSenhaPadrao');
+  el.textContent = config.senhaPadrao ? 'A senha ainda é a padrão: "admin". Troque em Segurança após entrar.' : '';
+}
+
+/* ---------- relatórios ---------- */
+function prepararDatasRelatorio(){
+  var d = hoje();
+  var primeiro = new Date(d.getFullYear(), d.getMonth(), 1);
+  document.getElementById('relDe').value = isoDia(primeiro);
+  document.getElementById('relAte').value = isoDia(d);
+}
+function vendasNoPeriodo(){
+  var de = document.getElementById('relDe').value;
+  var ate = document.getElementById('relAte').value;
+  return vendas.filter(function(v){
+    var dia = isoDia(new Date(v.data));
+    if (de && dia < de) return false;
+    if (ate && dia > ate) return false;
+    return true;
+  });
+}
+function gerarRelatorio(){
+  var lista = vendasNoPeriodo();
+  var totGeral = 0, pesoGeral = 0;
+  var porMat = {};
+  lista.forEach(function(v){
+    totGeral += v.total; pesoGeral += v.pesoTotal;
+    v.itens.forEach(function(it){
+      if (!porMat[it.nome]) porMat[it.nome] = { peso:0, valor:0 };
+      porMat[it.nome].peso += it.peso;
+      porMat[it.nome].valor += it.subtotal;
+    });
+  });
+  var html = '';
+  html += '<div class="resumo">';
+  html += '<div class="bloco"><div class="rot">Compras</div><div class="val">'+lista.length+'</div></div>';
+  html += '<div class="bloco"><div class="rot">Peso total</div><div class="val">'+fmtNum(pesoGeral,3)+' kg</div></div>';
+  html += '<div class="bloco total-grande"><div class="rot">Valor pago</div><div class="val">'+fmtBRL(totGeral)+'</div></div>';
+  html += '</div>';
+
+  var nomes = Object.keys(porMat).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+  html += '<h4 style="margin-top:16px;">Por material</h4>';
+  html += '<table><thead><tr><th>Material</th><th class="num">Peso (kg)</th><th class="num">Valor</th></tr></thead><tbody>';
+  nomes.forEach(function(n){
+    html += '<tr><td>'+n+'</td><td class="num">'+fmtNum(porMat[n].peso,3)+'</td><td class="num">'+fmtBRL(porMat[n].valor)+'</td></tr>';
+  });
+  html += '</tbody></table>';
+
+  html += '<h4 style="margin-top:16px;">Compras do período</h4>';
+  if (lista.length===0){
+    html += '<p class="mini">Nenhuma compra nesse período.</p>';
+  } else {
+    html += '<table><thead><tr><th>Nº</th><th>Data</th><th>Cliente</th><th>Pagto</th><th class="num">Peso</th><th class="num">Total</th></tr></thead><tbody>';
+    lista.slice().sort(function(a,b){ return new Date(b.data)-new Date(a.data); }).forEach(function(v){
+      var d = new Date(v.data);
+      html += '<tr><td>'+z(v.numero)+'</td><td>'+fmtData(d)+' '+fmtHora(d)+'</td><td>'+(v.cliente||'-')+
+              '</td><td>'+v.pagamento+'</td><td class="num">'+fmtNum(v.pesoTotal,3)+'</td><td class="num">'+fmtBRL(v.total)+'</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+  document.getElementById('saidaRelatorio').innerHTML = html;
+}
+function nomeArqPeriodo(ext){
+  var de = document.getElementById('relDe').value || 'inicio';
+  var ate = document.getElementById('relAte').value || 'fim';
+  return 'reciclagem_relatorio_'+de+'_a_'+ate+'.'+ext;
+}
+function exportarRelatorioCSV(){
+  var lista = vendasNoPeriodo();
+  var sep = ';';
+  var linhas = ['numero;data;hora;cliente;documento;placa;pagamento;material;preco_kg;peso_kg;subtotal;total_compra;observacao'];
+  lista.forEach(function(v){
+    var d = new Date(v.data);
+    v.itens.forEach(function(it){
+      linhas.push([
+        v.numero, fmtData(d), fmtHora(d),
+        csv(v.cliente), csv(v.doc), csv(v.placa), v.pagamento,
+        csv(it.nome), fmtNum(it.preco,4), fmtNum(it.peso,3), fmtNum(it.subtotal,2), fmtNum(v.total,2), csv(v.obs)
+      ].join(sep));
+    });
+  });
+  baixarArquivo(nomeArqPeriodo('csv'), '﻿'+linhas.join('\r\n'), 'text/csv;charset=utf-8');
+  function csv(s){ s = (s||'').toString(); return /[";\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
+}
+function exportarRelatorioJSON(){
+  var lista = vendasNoPeriodo();
+  var obj = { app:'braco-forte-reciclagem', tipo:'relatorio', geradoEm:hoje().toISOString(),
+              periodo:{ de:document.getElementById('relDe').value, ate:document.getElementById('relAte').value },
+              empresa:{ nome:config.nome, cnpj:config.cnpj }, compras:lista };
+  baixarArquivo(nomeArqPeriodo('json'), JSON.stringify(obj, null, 2));
+}
+
+/* ---------- backup ---------- */
+function exportarTudo(){
+  var obj = {
+    app:'braco-forte-reciclagem', tipo:'backup', versao:2,
+    exportadoEm: hoje().toISOString(),
+    config: config, materiais: materiais, vendas: vendas, log: registros
+  };
+  var d = hoje();
+  var nome = 'reciclagem_backup_'+isoDia(d)+'_'+z(d.getHours())+z(d.getMinutes())+'.json';
+  baixarArquivo(nome, JSON.stringify(obj, null, 2));
+  var maxNum = vendas.reduce(function(m,v){ return Math.max(m, v.numero); }, 0);
+  meta.exportadasAte = maxNum;
+  meta.ultimoExport = d.toISOString();
+  gravar(K.meta, meta);
+  atualizarBadgeExport();
+  toast('Backup gerado — suba este arquivo na nuvem');
+}
+function importarArquivo(ev){
+  var f = ev.target.files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    var obj;
+    try { obj = JSON.parse(r.result); }
+    catch(e){ alert('Arquivo inválido (não é JSON).'); return; }
+    if (obj.app !== 'braco-forte-reciclagem'){ alert('Este JSON não é um backup deste sistema.'); return; }
+    if (obj.tipo === 'backup'){
+      var opc = prompt('Digite:\n  SUBSTITUIR  = apagar tudo e usar o backup\n  MESCLAR     = manter atuais e adicionar compras do backup que faltam', 'MESCLAR');
+      if (!opc) return;
+      opc = opc.trim().toUpperCase();
+      if (opc === 'SUBSTITUIR'){
+        config = obj.config; materiais = obj.materiais; vendas = obj.vendas || [];
+        registros = obj.log || [];
+      } else if (opc === 'MESCLAR'){
+        var existentes = {};
+        vendas.forEach(function(v){ existentes[v.numero+'|'+v.data] = true; });
+        (obj.vendas||[]).forEach(function(v){ if (!existentes[v.numero+'|'+v.data]) vendas.push(v); });
+        vendas.sort(function(a,b){ return a.numero-b.numero; });
+        var maxN = vendas.reduce(function(m,v){ return Math.max(m,v.numero); }, 0);
+        if (config.proximoNumero <= maxN) config.proximoNumero = maxN+1;
+        var tsExist = {};
+        registros.forEach(function(r){ tsExist[r.ts+'|'+r.desc] = true; });
+        (obj.log||[]).forEach(function(r){ if (!tsExist[r.ts+'|'+r.desc]) registros.push(r); });
+        registros.sort(function(a,b){ return new Date(a.ts)-new Date(b.ts); });
+      } else { alert('Opção não reconhecida.'); return; }
+      registrar('import', 'Backup importado (' + opc + '): ' + ((obj.vendas||[]).length) + ' compra(s) no arquivo', null);
+      gravar(K.cfg, config); gravar(K.mat, materiais); gravar(K.vend, vendas); gravar(K.log, registros);
+      alert('Importado com sucesso. A página vai recarregar.');
+      location.reload();
+    } else {
+      alert('Este arquivo é um relatório de período, não um backup completo. Use "Exportar TUDO" para gerar backups.');
+    }
+  };
+  r.readAsText(f, 'utf-8');
+  ev.target.value = '';
+}
+function atualizarBadgeExport(){
+  var maxNum = vendas.reduce(function(m,v){ return Math.max(m, v.numero); }, 0);
+  var pend = vendas.filter(function(v){ return v.numero > (meta.exportadasAte||0); }).length;
+  var box = document.getElementById('nExport');
+  if (pend > 0){
+    box.classList.remove('oculto');
+    box.innerHTML = '<span class="badge">'+pend+'</span> compra(s) ainda não incluídas em nenhum backup. Clique em <b>Exportar TUDO</b> e suba na nuvem.';
+  } else {
+    box.classList.add('oculto');
+  }
+  var st = document.getElementById('statusExport');
+  st.textContent = meta.ultimoExport ? ('Último backup: '+fmtData(new Date(meta.ultimoExport))+' '+fmtHora(new Date(meta.ultimoExport))) : 'Nenhum backup gerado ainda neste computador.';
+}
+function apagarComprasAntigas(){
+  var lim = prompt('Apagar compras ANTERIORES a qual data? (formato: AAAA-MM-DD)\nElas serão removidas deste computador — só faça isso se o backup na nuvem estiver salvo.');
+  if (!lim) return;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(lim)){ alert('Data inválida.'); return; }
+  var antes = vendas.length;
+  var apagar = vendas.filter(function(v){ return isoDia(new Date(v.data)) < lim; });
+  var pendentes = apagar.filter(function(v){ return v.numero > (meta.exportadasAte||0); });
+  if (pendentes.length && !confirm(pendentes.length+' compra(s) a apagar ainda NÃO estão em backup. Continuar mesmo assim?')) return;
+  apagar.forEach(function(v){
+    registrar('compra_apagada', 'Compra Nº ' + z(v.numero) + ' de ' + fmtData(new Date(v.data)) + ' ' + fmtHora(new Date(v.data)) + ' (' + fmtBRL(v.total) + ') apagada',
+              { numero:v.numero, data:v.data, total:v.total, cliente:v.cliente||'' });
+  });
+  vendas = vendas.filter(function(v){ return isoDia(new Date(v.data)) >= lim; });
+  gravar(K.vend, vendas);
+  alert((antes - vendas.length)+' compra(s) apagada(s). A página vai recarregar.');
+  location.reload();
+}
+
+/* ---------- marca / topo ---------- */
+function aplicarMarca(){
+  document.getElementById('marcaTopo').textContent = config.nome || 'Reciclagem';
+  var partes = [];
+  if (config.cnpj) partes.push('CNPJ: '+config.cnpj);
+  if (config.telefone) partes.push('Tel: '+config.telefone);
+  document.getElementById('infoTopo').textContent = partes.join('  •  ');
+  document.title = (config.nome || 'Reciclagem') + ' — Compras';
+}
+
+/* ---------- init ---------- */
+function init(){
+  carregar();
+  aplicarMarca();
+  renderGridMateriais();
+  atualizarNumeroCompra();
+  limparCompra(false);
+  atualizarDicaSenha();
+
+  var inPeso = document.getElementById('inPeso');
+  inPeso.addEventListener('input', function(){
+    this.value = this.value.replace(/[^\d.,]/g, '');
+    atualizarConta();
+  });
+  inPeso.addEventListener('keydown', function(e){ if (e.key==='Enter'){ e.preventDefault(); adicionarItem(); } });
+
+  // avisa antes de fechar se houver itens não finalizados
+  window.addEventListener('beforeunload', function(e){
+    if (itensAtual.length>0){ e.preventDefault(); e.returnValue=''; }
+  });
+}
+init();
+</script>
+</body>
+</html>
