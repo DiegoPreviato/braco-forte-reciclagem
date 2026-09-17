@@ -186,7 +186,7 @@
   #btnFinalizarSo:hover { background: rgba(255,255,255,.08); }
   #btnFinalizarSo:disabled { opacity: .4; }
 
-  /* ====== impressão cupom 80mm ====== */
+  /* ====== impressão cupom 58mm ====== */
   #areaImpressao { display: none; }
   @media print {
     body { background: #fff; }
@@ -197,11 +197,11 @@
       font-size: 12px;
       line-height: 1.35;
       color: #000;
-      width: 72mm;
+      width: 48mm;
     }
     #areaImpressao pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
     .corte { border-top: 1px dashed #000; margin: 6mm 0; }
-    @page { size: 72mm auto; margin: 4mm 3mm; }
+    @page { size: 58mm auto; margin: 2mm 1mm; }
   }
 </style>
 </head>
@@ -809,7 +809,7 @@ function reimprimirUltima(){
   imprimirVenda(vendas[vendas.length-1]);
 }
 
-/* ---------- montar cupom 80mm ---------- */
+/* ---------- montar cupom 58mm ---------- */
 var LARG = 32;
 function centro(t){
   t = String(t);

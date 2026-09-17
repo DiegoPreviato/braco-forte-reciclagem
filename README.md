@@ -49,15 +49,29 @@ Não apague os dados do site / histórico do navegador sem antes fazer um backup
    - **Finalizar sem imprimir**: só registra.
    - **Reimprimir última** / **Cancelar compra**: links abaixo da lista.
 
-## Impressora térmica (cupom 80mm)
+## Impressora térmica (cupom 58mm)
 
-O layout já é feito para bobina de **80mm**. Na janela de impressão do navegador:
+O layout já é feito para bobina de **58mm** (ex: impressoras POS-58). Na janela de
+impressão do navegador:
 
 - Impressora: selecione a térmica.
 - Margens: **Nenhuma**.
-- Tamanho do papel: 80mm x recibo (ou "72mm" / rolo), conforme o driver.
+- Tamanho do papel: 58mm x recibo (ou "58mm" / rolo), conforme o driver.
 - Desmarque "Cabeçalhos e rodapés".
 - Marque "Gráficos em segundo plano" se a linha de corte não aparecer.
+
+Se a impressora ficar **imprimindo sem parar** (alimentando papel em branco depois do
+cupom sair), o motivo quase sempre é o **tamanho de papel configurado errado** — confira:
+
+- No driver da impressora no Windows (Configurações > Impressoras > POS-58 >
+  Preferências de impressão), o tamanho de papel deve estar em **58mm**, não em
+  "Carta"/"A4" nem outro tamanho maior.
+- Na janela de impressão do navegador, confirme que o tamanho de papel selecionado
+  também é o de 58mm (não "Carta"/"A4"). Se não aparecer, use "Imprimir usando a caixa
+  de diálogo do sistema" para acessar as opções completas do driver.
+- Se o problema persistir, tente reinstalar o driver oficial da POS-58 (em vez do
+  driver genérico "Generic / Text Only" do Windows) — drivers genéricos costumam lidar
+  mal com o tamanho de página "automático" usado por rolo contínuo.
 
 Dica: no Chrome/Edge dá para marcar "Imprimir usando a caixa de diálogo do sistema" e
 salvar essas configurações como padrão da impressora.
