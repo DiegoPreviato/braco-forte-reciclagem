@@ -198,10 +198,11 @@
       line-height: 1.35;
       color: #000;
       width: 48mm;
+      margin: 0 auto;
     }
     #areaImpressao pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
     .corte { border-top: 1px dashed #000; margin: 6mm 0; }
-    @page { size: 58mm auto; margin: 2mm 1mm; }
+    @page { size: 58mm auto; margin: 0; }
   }
 </style>
 </head>
@@ -840,7 +841,7 @@ function via(venda, tipo){
   if (config.cnpj) L.push(centro('CNPJ: '+config.cnpj));
   if (config.telefone) L.push(centro('Tel: '+config.telefone));
   L.push(rep('-', LARG));
-  L.push('COMPRA DE MATERIAL  Nº '+z(venda.numero));
+  L.push('COMPRA DE MATERIAL  N. '+z(venda.numero));
   L.push(fmtData(d)+'  '+fmtHora(d));
   L.push('VIA: '+tipo);
   L.push(rep('-', LARG));
