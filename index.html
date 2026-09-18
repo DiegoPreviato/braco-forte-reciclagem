@@ -195,14 +195,14 @@
       display: block;
       font-family: "Courier New", monospace;
       font-size: 12px;
-      line-height: 1.35;
+      line-height: 1.2;
       color: #000;
       width: 48mm;
       margin: 0 auto;
     }
     #areaImpressao pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
-    .corte { border-top: 1px dashed #000; margin: 6mm 0; }
-    @page { size: 58mm auto; margin: 0; }
+    .corte { border-top: 1px dashed #000; margin: 3mm 0; }
+    @page { size: 58mm auto; margin: 2mm; }
   }
 </style>
 </head>
@@ -462,6 +462,11 @@ function fmtBRL(n){
 function fmtNum(n, dec){
   return Number(n).toFixed(dec||0).replace('.', ',');
 }
+function fmtKg(n){
+  var s = (Math.round((Number(n)+Number.EPSILON)*1000)/1000).toFixed(3);
+  s = s.replace(/0+$/, '').replace(/\.$/, '');
+  return s.replace('.', ',');
+}
 function hash(s){
   var h = 5381;
   for (var i=0;i<s.length;i++){ h = ((h<<5)+h) + s.charCodeAt(i); h = h & 0xffffffff; }
@@ -693,7 +698,7 @@ function adicionarItem(){
   campoPeso.value = '';
   atualizarConta();
   h.className = 'hint ok';
-  h.innerHTML = SVG_CHECK + ' <span><b>' + m.nome + ' — ' + fmtNum(p,3) + ' kg</b> adicionado (' + fmtBRL(sub) + '). Pese a próxima carga ou escolha outro material.</span>';
+  h.innerHTML = SVG_CHECK + ' <span><b>' + m.nome + ' — ' + fmtKg(p) + ' kg</b> adicionado (' + fmtBRL(sub) + '). Pese a próxima carga ou escolha outro material.</span>';
   renderItens();
   campoPeso.focus();
 }
@@ -711,7 +716,7 @@ function renderItens(){
     row.innerHTML =
       (it.id===ultimoItemId ? '<span class="flag">'+SVG_CHECK+'</span>' : '') +
       '<span class="rm"></span>' +
-      '<span class="rc">' + fmtNum(it.peso,3) + ' kg × ' + fmtBRL(it.preco) + '</span>' +
+      '<span class="rc">' + fmtKg(it.peso) + ' kg × ' + fmtBRL(it.preco) + '</span>' +
       '<span class="rs">' + fmtBRL(it.subtotal) + '</span>';
     row.querySelector('.rm').textContent = it.nome;
     var btn = document.createElement('button');
@@ -728,7 +733,7 @@ function renderItens(){
   document.getElementById('stkTotal').textContent = fmtBRL(total);
   document.getElementById('stkResumo').textContent = itensAtual.length===0
     ? 'Adicione ao menos 1 material'
-    : itensAtual.length + (itensAtual.length===1 ? ' item · ' : ' itens · ') + fmtNum(peso,3) + ' kg';
+    : itensAtual.length + (itensAtual.length===1 ? ' item · ' : ' itens · ') + fmtKg(peso) + ' kg';
 
   var pode = itensAtual.length>0;
   document.getElementById('btnFinalizarImprimir').disabled = !pode;
@@ -847,10 +852,10 @@ function via(venda, tipo){
   L.push(rep('-', LARG));
   venda.itens.forEach(function(it){
     L.push(it.nome);
-    L.push(esqDir('  '+fmtNum(it.peso,3)+'kg x '+fmtBRL(it.preco), fmtBRL(it.subtotal)));
+    L.push(esqDir('  '+fmtKg(it.peso)+'kg x '+fmtBRL(it.preco), fmtBRL(it.subtotal)));
   });
   L.push(rep('-', LARG));
-  L.push(esqDir('PESO TOTAL:', fmtNum(venda.pesoTotal,3)+' kg'));
+  L.push(esqDir('PESO TOTAL:', fmtKg(venda.pesoTotal)+' kg'));
   L.push(esqDir('VALOR TOTAL:', fmtBRL(venda.total)));
   L.push(rep('-', LARG));
   L.push('Pagamento: '+venda.pagamento);
@@ -862,7 +867,6 @@ function via(venda, tipo){
   L.push('Assinatura do cliente:');
   L.push('');
   L.push(rep('_', LARG));
-  L.push('');
   if (config.rodape) L.push(centro(config.rodape));
   L.push(centro('* '+tipo+' *'));
   return L.join('\n');
@@ -1098,7 +1102,7 @@ function gerarRelatorio(){
   var html = '';
   html += '<div class="resumo">';
   html += '<div class="bloco"><div class="rot">Compras</div><div class="val">'+lista.length+'</div></div>';
-  html += '<div class="bloco"><div class="rot">Peso total</div><div class="val">'+fmtNum(pesoGeral,3)+' kg</div></div>';
+  html += '<div class="bloco"><div class="rot">Peso total</div><div class="val">'+fmtKg(pesoGeral)+' kg</div></div>';
   html += '<div class="bloco total-grande"><div class="rot">Valor pago</div><div class="val">'+fmtBRL(totGeral)+'</div></div>';
   html += '</div>';
 
@@ -1106,7 +1110,7 @@ function gerarRelatorio(){
   html += '<h4 style="margin-top:16px;">Por material</h4>';
   html += '<table><thead><tr><th>Material</th><th class="num">Peso (kg)</th><th class="num">Valor</th></tr></thead><tbody>';
   nomes.forEach(function(n){
-    html += '<tr><td>'+n+'</td><td class="num">'+fmtNum(porMat[n].peso,3)+'</td><td class="num">'+fmtBRL(porMat[n].valor)+'</td></tr>';
+    html += '<tr><td>'+n+'</td><td class="num">'+fmtKg(porMat[n].peso)+'</td><td class="num">'+fmtBRL(porMat[n].valor)+'</td></tr>';
   });
   html += '</tbody></table>';
 
@@ -1118,7 +1122,7 @@ function gerarRelatorio(){
     lista.slice().sort(function(a,b){ return new Date(b.data)-new Date(a.data); }).forEach(function(v){
       var d = new Date(v.data);
       html += '<tr><td>'+z(v.numero)+'</td><td>'+fmtData(d)+' '+fmtHora(d)+'</td><td>'+(v.cliente||'-')+
-              '</td><td>'+v.pagamento+'</td><td class="num">'+fmtNum(v.pesoTotal,3)+'</td><td class="num">'+fmtBRL(v.total)+'</td></tr>';
+              '</td><td>'+v.pagamento+'</td><td class="num">'+fmtKg(v.pesoTotal)+'</td><td class="num">'+fmtBRL(v.total)+'</td></tr>';
     });
     html += '</tbody></table>';
   }
