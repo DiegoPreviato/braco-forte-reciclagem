@@ -423,6 +423,7 @@
 
 <!-- área que vai para a impressora térmica -->
 <div id="areaImpressao"></div>
+<style id="pagCupom"></style>
 
 <script>
 /* =========================================================
@@ -868,13 +869,30 @@ function via(venda, tipo){
   L.push(centro('* '+tipo+' *'));
   return L.join('\n');
 }
+/* altura de pagina fixa em mm, calculada a partir do numero de linhas do cupom.
+   evita "@page { size: 58mm auto }": em alguns drivers de impressora termica
+   a altura automatica trava a impressora num loop de alimentacao em branco. */
+function pxParaMM(px){ return px * 25.4 / 96; }
+function calcularAlturaCupomMM(linhas1, linhas2){
+  var FONTE_PX = 9, LINHA_ALT = 1.2, MARGEM_PAGINA_MM = 2, CORTE_MM = 6, FOLGA_MM = 4;
+  var alturaLinhaMM = pxParaMM(FONTE_PX * LINHA_ALT);
+  var conteudoMM = (linhas1 + linhas2) * alturaLinhaMM + CORTE_MM;
+  return Math.ceil(conteudoMM + MARGEM_PAGINA_MM*2 + FOLGA_MM);
+}
+function definirAlturaPaginaCupom(mm){
+  document.getElementById('pagCupom').textContent =
+    '@media print { @page { size: 58mm ' + mm + 'mm; margin: 2mm; } }';
+}
 function imprimirVenda(venda){
   var area = document.getElementById('areaImpressao');
   area.innerHTML = '';
-  var p1 = document.createElement('pre'); p1.textContent = via(venda, 'RECICLAGEM');
+  var texto1 = via(venda, 'RECICLAGEM');
+  var texto2 = via(venda, 'CLIENTE');
+  var p1 = document.createElement('pre'); p1.textContent = texto1;
   var corte = document.createElement('div'); corte.className = 'corte';
-  var p2 = document.createElement('pre'); p2.textContent = via(venda, 'CLIENTE');
+  var p2 = document.createElement('pre'); p2.textContent = texto2;
   area.appendChild(p1); area.appendChild(corte); area.appendChild(p2);
+  definirAlturaPaginaCupom(calcularAlturaCupomMM(texto1.split('\n').length, texto2.split('\n').length));
   setTimeout(function(){ window.print(); }, 150);
 }
 
