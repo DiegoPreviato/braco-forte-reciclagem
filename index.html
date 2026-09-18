@@ -869,14 +869,25 @@ function via(venda, tipo){
   L.push(centro('* '+tipo+' *'));
   return L.join('\n');
 }
-/* altura de pagina fixa em mm, calculada a partir do numero de linhas do cupom.
+/* altura de pagina fixa em mm, medida a partir da altura real renderizada do
+   texto do cupom (e nao so contando \n, ja que campos longos tipo Cliente/Obs
+   quebram em mais de uma linha na tela pelo word-break).
    evita "@page { size: 58mm auto }": em alguns drivers de impressora termica
    a altura automatica trava a impressora num loop de alimentacao em branco. */
-function pxParaMM(px){ return px * 25.4 / 96; }
-function calcularAlturaCupomMM(linhas1, linhas2){
-  var FONTE_PX = 9, LINHA_ALT = 1.2, MARGEM_PAGINA_MM = 2, CORTE_MM = 6, FOLGA_MM = 4;
-  var alturaLinhaMM = pxParaMM(FONTE_PX * LINHA_ALT);
-  var conteudoMM = (linhas1 + linhas2) * alturaLinhaMM + CORTE_MM;
+function medirAlturaTextoMM(texto){
+  var pre = document.createElement('pre');
+  pre.style.cssText = 'position:absolute; visibility:hidden; left:-9999px; top:0; margin:0; ' +
+    'white-space:pre-wrap; word-break:break-word; font-family:"Courier New",monospace; ' +
+    'font-size:9px; line-height:1.2; width:48mm;';
+  pre.textContent = texto;
+  document.body.appendChild(pre);
+  var alturaPx = pre.scrollHeight;
+  document.body.removeChild(pre);
+  return alturaPx * 25.4 / 96;
+}
+function calcularAlturaCupomMM(texto1, texto2){
+  var MARGEM_PAGINA_MM = 2, CORTE_MM = 6.5, FOLGA_MM = 4;
+  var conteudoMM = medirAlturaTextoMM(texto1) + medirAlturaTextoMM(texto2) + CORTE_MM;
   return Math.ceil(conteudoMM + MARGEM_PAGINA_MM*2 + FOLGA_MM);
 }
 function definirAlturaPaginaCupom(mm){
@@ -892,7 +903,7 @@ function imprimirVenda(venda){
   var corte = document.createElement('div'); corte.className = 'corte';
   var p2 = document.createElement('pre'); p2.textContent = texto2;
   area.appendChild(p1); area.appendChild(corte); area.appendChild(p2);
-  definirAlturaPaginaCupom(calcularAlturaCupomMM(texto1.split('\n').length, texto2.split('\n').length));
+  definirAlturaPaginaCupom(calcularAlturaCupomMM(texto1, texto2));
   setTimeout(function(){ window.print(); }, 150);
 }
 
