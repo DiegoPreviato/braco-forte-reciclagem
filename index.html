@@ -202,7 +202,7 @@
     }
     #areaImpressao pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
     .corte { border-top: 1px dashed #000; margin: 3mm 0; }
-    @page { size: 58mm auto; margin: 2mm; }
+    @page { size: 58mm 297mm; margin: 2mm; }
   }
 </style>
 </head>
@@ -890,6 +890,18 @@ function calcularAlturaCupomMM(texto1, texto2){
   var conteudoMM = medirAlturaTextoMM(texto1) + medirAlturaTextoMM(texto2) + CORTE_MM;
   return Math.ceil(conteudoMM + MARGEM_PAGINA_MM*2 + FOLGA_MM);
 }
+/* o driver desta impressora (ZPrinter) so aceita alguns tamanhos fixos de
+   papel (58x210mm, 58x297mm, 58x3276mm). Se pedirmos um valor que nao bate
+   exatamente com nenhum, ele cai no maior (3276mm = 3,2m!), que e o que
+   causava o "loop" de impressao em branco. Por isso arredondamos sempre
+   para um desses tamanhos conhecidos, nunca um valor arbitrario. */
+var TAMANHOS_PAPEL_MM = [210, 297];
+function escolherTamanhoPaginaMM(mmNecessario){
+  for (var i=0;i<TAMANHOS_PAPEL_MM.length;i++){
+    if (mmNecessario <= TAMANHOS_PAPEL_MM[i]) return TAMANHOS_PAPEL_MM[i];
+  }
+  return TAMANHOS_PAPEL_MM[TAMANHOS_PAPEL_MM.length-1];
+}
 function definirAlturaPaginaCupom(mm){
   document.getElementById('pagCupom').textContent =
     '@media print { @page { size: 58mm ' + mm + 'mm; margin: 2mm; } }';
@@ -903,7 +915,7 @@ function imprimirVenda(venda){
   var corte = document.createElement('div'); corte.className = 'corte';
   var p2 = document.createElement('pre'); p2.textContent = texto2;
   area.appendChild(p1); area.appendChild(corte); area.appendChild(p2);
-  definirAlturaPaginaCupom(calcularAlturaCupomMM(texto1, texto2));
+  definirAlturaPaginaCupom(escolherTamanhoPaginaMM(calcularAlturaCupomMM(texto1, texto2)));
   setTimeout(function(){ window.print(); }, 150);
 }
 
