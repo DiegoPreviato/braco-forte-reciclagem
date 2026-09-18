@@ -188,6 +188,7 @@
 
   /* ====== impressão cupom 58mm ====== */
   #areaImpressao { display: none; }
+  #areaImpressaoRelatorio { display: none; }
   @media print {
     body { background: #fff; }
     #app { display: none !important; }
@@ -326,8 +327,6 @@
 
     <div id="painelAdm" class="oculto">
 
-      <div id="nExport" class="aviso oculto"></div>
-
       <fieldset>
         <legend>Materiais e preços</legend>
         <table id="tabelaMateriais">
@@ -339,36 +338,11 @@
         <div class="acoes">
           <button class="secundario" onclick="addLinhaMaterial()">➕ Adicionar material</button>
           <button onclick="salvarMateriais()">💾 Salvar materiais</button>
-          <button class="secundario" onclick="exportarMateriais()">⬇️ Exportar materiais (JSON)</button>
           <button class="perigo" onclick="restaurarMateriaisPadrao()">↻ Restaurar lista padrão (36 itens)</button>
+          <button class="secundario so-avancado oculto" onclick="exportarMateriais()">⬇️ Exportar materiais (JSON)</button>
         </div>
         <p class="mini">O preço aceita centavos (ex: 0,15). Desmarque "Ativo" para esconder um material da tela de compra sem apagar o histórico.
-        Toda alteração de preço, nome ou exclusão fica gravada no <b>Registro de alterações</b> abaixo.<br>
-        <b>Restaurar lista padrão</b> apaga o cadastro atual e volta para os 36 materiais originais com os preços combinados.
-        A lista de materiais também vai dentro do <b>Exportar TUDO</b>.</p>
-      </fieldset>
-
-      <fieldset>
-        <legend>Dados da empresa (cabeçalho do cupom)</legend>
-        <div class="linha-form">
-          <div class="campo grande"><label>Nome</label><input id="cfgNome" type="text"></div>
-          <div class="campo"><label>CNPJ</label><input id="cfgCnpj" type="text"></div>
-        </div>
-        <div class="linha-form" style="margin-top:10px;">
-          <div class="campo grande"><label>Endereço</label><input id="cfgEndereco" type="text"></div>
-          <div class="campo"><label>Telefone</label><input id="cfgTelefone" type="text"></div>
-        </div>
-        <div class="campo grande" style="margin-top:10px;"><label>Rodapé do cupom</label><input id="cfgRodape" type="text" placeholder="ex: Obrigado pela preferência!"></div>
-        <div class="acoes"><button onclick="salvarEmpresa()">💾 Salvar dados da empresa</button></div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Segurança</legend>
-        <div class="linha-form">
-          <div class="campo"><label>Nova senha</label><input id="novaSenha1" type="password" autocomplete="off"></div>
-          <div class="campo"><label>Repetir nova senha</label><input id="novaSenha2" type="password" autocomplete="off"></div>
-          <div class="campo" style="flex:0 0 auto;"><label>&nbsp;</label><button onclick="trocarSenha()">Trocar senha</button></div>
-        </div>
+        <b>Restaurar lista padrão</b> apaga o cadastro atual e volta para os 36 materiais originais com os preços combinados.</p>
       </fieldset>
 
       <fieldset>
@@ -380,42 +354,74 @@
         </div>
         <div id="saidaRelatorio" style="margin-top:14px;"></div>
         <div class="acoes">
-          <button class="secundario" onclick="exportarRelatorioCSV()">⬇️ Exportar CSV (Excel)</button>
-          <button class="secundario" onclick="exportarRelatorioJSON()">⬇️ Exportar JSON do período</button>
+          <button class="secundario" onclick="imprimirRelatorio()">🖨️ Imprimir relatório</button>
+          <button class="secundario so-avancado oculto" onclick="exportarRelatorioCSV()">⬇️ Exportar CSV (Excel)</button>
+          <button class="secundario so-avancado oculto" onclick="exportarRelatorioJSON()">⬇️ Exportar JSON do período</button>
         </div>
       </fieldset>
 
-      <fieldset>
-        <legend>Registro de alterações (log)</legend>
-        <p class="mini" id="logContagem"></p>
-        <div style="max-height:340px;overflow:auto;border:1px solid #cbd2d9;border-radius:6px;">
-          <table><thead><tr><th class="num">Data / hora</th><th>Ação</th></tr></thead>
-          <tbody id="corpoLog"></tbody></table>
-        </div>
-        <div class="acoes">
-          <button class="secundario" onclick="exportarLog()">⬇️ Exportar log completo (JSON)</button>
-        </div>
-        <p class="mini">Grava alteração de preço, nome, ativação/remoção de material, exclusão de compras, troca de senha, mudança nos dados da empresa e importação de backup — com data e hora. Também vai dentro do <b>Exportar TUDO</b>.</p>
-      </fieldset>
+      <button class="btn-quiet" id="btnAvancado" onclick="toggleAvancado()">Mostrar opções avançadas ▾</button>
 
-      <fieldset>
-        <legend>Backup (para subir na nuvem)</legend>
-        <p class="mini">Exporte o arquivo JSON com <b>tudo</b> (compras + materiais + configuração + registro de alterações) e guarde na nuvem. Recomendado fazer todo dia no fim do expediente.</p>
-        <div class="acoes">
-          <button onclick="exportarTudo()">⬇️ Exportar TUDO (JSON)</button>
-          <button class="secundario" onclick="document.getElementById('inImport').click()">⬆️ Importar / restaurar JSON</button>
-          <input id="inImport" type="file" accept=".json,application/json" class="oculto" onchange="importarArquivo(event)">
-        </div>
-        <p class="mini" id="statusExport"></p>
-      </fieldset>
+      <div id="avancadoAdm" class="oculto" style="margin-top:10px;">
 
-      <fieldset>
-        <legend>Manutenção</legend>
-        <div class="acoes">
-          <button class="perigo" onclick="apagarComprasAntigas()">Apagar compras anteriores a uma data…</button>
-        </div>
-        <p class="mini">Use só depois de confirmar que o backup na nuvem está salvo.</p>
-      </fieldset>
+        <div id="nExport" class="aviso oculto"></div>
+
+        <fieldset>
+          <legend>Dados da empresa (cabeçalho do cupom)</legend>
+          <div class="linha-form">
+            <div class="campo grande"><label>Nome</label><input id="cfgNome" type="text"></div>
+            <div class="campo"><label>CNPJ</label><input id="cfgCnpj" type="text"></div>
+          </div>
+          <div class="linha-form" style="margin-top:10px;">
+            <div class="campo grande"><label>Endereço</label><input id="cfgEndereco" type="text"></div>
+            <div class="campo"><label>Telefone</label><input id="cfgTelefone" type="text"></div>
+          </div>
+          <div class="campo grande" style="margin-top:10px;"><label>Rodapé do cupom</label><input id="cfgRodape" type="text" placeholder="ex: Obrigado pela preferência!"></div>
+          <div class="acoes"><button onclick="salvarEmpresa()">💾 Salvar dados da empresa</button></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Segurança</legend>
+          <div class="linha-form">
+            <div class="campo"><label>Nova senha</label><input id="novaSenha1" type="password" autocomplete="off"></div>
+            <div class="campo"><label>Repetir nova senha</label><input id="novaSenha2" type="password" autocomplete="off"></div>
+            <div class="campo" style="flex:0 0 auto;"><label>&nbsp;</label><button onclick="trocarSenha()">Trocar senha</button></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Registro de alterações (log)</legend>
+          <p class="mini" id="logContagem"></p>
+          <div style="max-height:340px;overflow:auto;border:1px solid #cbd2d9;border-radius:6px;">
+            <table><thead><tr><th class="num">Data / hora</th><th>Ação</th></tr></thead>
+            <tbody id="corpoLog"></tbody></table>
+          </div>
+          <div class="acoes">
+            <button class="secundario" onclick="exportarLog()">⬇️ Exportar log completo (JSON)</button>
+          </div>
+          <p class="mini">Grava alteração de preço, nome, ativação/remoção de material, exclusão de compras, troca de senha, mudança nos dados da empresa e importação de backup — com data e hora. Também vai dentro do <b>Exportar TUDO</b>.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Backup (para subir na nuvem)</legend>
+          <p class="mini">Exporte o arquivo JSON com <b>tudo</b> (compras + materiais + configuração + registro de alterações) e guarde na nuvem. Recomendado fazer todo dia no fim do expediente.</p>
+          <div class="acoes">
+            <button onclick="exportarTudo()">⬇️ Exportar TUDO (JSON)</button>
+            <button class="secundario" onclick="document.getElementById('inImport').click()">⬆️ Importar / restaurar JSON</button>
+            <input id="inImport" type="file" accept=".json,application/json" class="oculto" onchange="importarArquivo(event)">
+          </div>
+          <p class="mini" id="statusExport"></p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Manutenção</legend>
+          <div class="acoes">
+            <button class="perigo" onclick="apagarComprasAntigas()">Apagar compras anteriores a uma data…</button>
+          </div>
+          <p class="mini">Use só depois de confirmar que o backup na nuvem está salvo.</p>
+        </fieldset>
+
+      </div>
 
     </div>
   </div>
@@ -423,6 +429,8 @@
 
 <!-- área que vai para a impressora térmica -->
 <div id="areaImpressao"></div>
+<!-- área usada para imprimir o relatório em papel comum (A4) -->
+<div id="areaImpressaoRelatorio"></div>
 <style id="pagCupom"></style>
 
 <script>
@@ -587,6 +595,18 @@ function bloquearAdm(){
   setOculto('painelAdm', true);
   var s = document.getElementById('inSenha'); if (s) s.value = '';
   var e = document.getElementById('erroSenha'); if (e) e.textContent = '';
+}
+function resetAvancado(){
+  setOculto('avancadoAdm', true);
+  qsa('.so-avancado').forEach(function(el){ setOculto(el, true); });
+  document.getElementById('btnAvancado').textContent = 'Mostrar opções avançadas ▾';
+}
+function toggleAvancado(){
+  var mostrar = document.getElementById('avancadoAdm').classList.contains('oculto');
+  setOculto('avancadoAdm', !mostrar);
+  qsa('.so-avancado').forEach(function(el){ setOculto(el, !mostrar); });
+  document.getElementById('btnAvancado').textContent = mostrar ? 'Ocultar opções avançadas ▴' : 'Mostrar opções avançadas ▾';
+  if (mostrar) atualizarBadgeExport();
 }
 function mostrarAba(qual){
   if (qual !== 'adm' && admLiberado) bloquearAdm();
@@ -928,6 +948,7 @@ function entrarAdm(){
     document.getElementById('erroSenha').textContent = '';
     document.getElementById('loginAdm').classList.add('oculto');
     document.getElementById('painelAdm').classList.remove('oculto');
+    resetAvancado();
     renderMateriaisAdm();
     preencherEmpresa();
     prepararDatasRelatorio();
@@ -1125,8 +1146,7 @@ function vendasNoPeriodo(){
     return true;
   });
 }
-function gerarRelatorio(){
-  var lista = vendasNoPeriodo();
+function montarHtmlRelatorio(lista){
   var totGeral = 0, pesoGeral = 0;
   var porMat = {};
   lista.forEach(function(v){
@@ -1164,7 +1184,25 @@ function gerarRelatorio(){
     });
     html += '</tbody></table>';
   }
-  document.getElementById('saidaRelatorio').innerHTML = html;
+  return html;
+}
+function gerarRelatorio(){
+  document.getElementById('saidaRelatorio').innerHTML = montarHtmlRelatorio(vendasNoPeriodo());
+}
+function imprimirRelatorio(){
+  var lista = vendasNoPeriodo();
+  if (lista.length===0){ alert('Nenhuma compra no período selecionado para imprimir.'); return; }
+  var de = document.getElementById('relDe').value;
+  var ate = document.getElementById('relAte').value;
+  var cabecalho = '<h2 style="margin-bottom:2px;">'+(config.nome||'Relatório')+'</h2>' +
+    '<p class="mini" style="margin-top:0;">Período: '+(de||'início')+' a '+(ate||'hoje')+
+    ' &nbsp;·&nbsp; Gerado em '+fmtData(hoje())+' '+fmtHora(hoje())+'</p>';
+  document.getElementById('areaImpressaoRelatorio').innerHTML = cabecalho + montarHtmlRelatorio(lista);
+  document.getElementById('pagCupom').textContent =
+    '@media print { @page { size: A4; margin: 15mm; } ' +
+    '#app{display:none !important;} #areaImpressao{display:none !important;} ' +
+    '#areaImpressaoRelatorio{display:block !important;} }';
+  setTimeout(function(){ window.print(); }, 150);
 }
 function nomeArqPeriodo(ext){
   var de = document.getElementById('relDe').value || 'inicio';
